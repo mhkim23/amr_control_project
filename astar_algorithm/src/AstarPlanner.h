@@ -40,7 +40,7 @@ namespace astar_planner {
             vector<int> parentNode;
             string m_frame_id;
             ros::Publisher pub;
-            
+            string frame_id;
             AstarPlanner(); // default constructor
             AstarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
@@ -53,6 +53,7 @@ namespace astar_planner {
             double getGcost(int fstIdx, int sndIdx);
             int getHeuristic(int nIdx, int goalIdx);
             bool areaLimit(int x, int y);
+            void publishPlan(const std::vector<geometry_msgs::PoseStamped>& path);
     };
 };
 

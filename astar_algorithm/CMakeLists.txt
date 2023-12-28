@@ -121,7 +121,7 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
-add_library(astar_algorithm. src/AstarPlanner.cpp)
+add_library(astar_algorithm src/AstarPlanner.cpp)
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/astar_algorithm.cpp

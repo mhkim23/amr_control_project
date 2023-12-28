@@ -137,6 +137,8 @@ namespace astar_planner {
             reverse_start = parentNode[reverse_start];
         }
         reverse(path.begin(),path.end());
+
+        ros::Time plan_time = ros::Time::now();
         for(int i = 0; i < path.size(); i++) {
             unsigned int tmp_x,tmp_y;
             m_costmap->indexToCells(path[i],tmp_x,tmp_y);
@@ -144,12 +146,14 @@ namespace astar_planner {
             m_costmap->mapToWorld(tmp_x,tmp_y,cur_x,cur_y);
 
             geometry_msgs::PoseStamped coord;
+            coord.header.stamp = plan_time;
+            coord.header.frame_id = m_costmap_ros->getGlobalFrameID();
             coord.pose.position.x = cur_x;
             coord.pose.position.y = cur_y;
             coord.pose.position.z = 0.0;
             if(i == 0) {
                 double angle = atan2(cur_y-0,cur_x-0);
-                coord.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
+                coord.pose.orientation = tf::createQuaternionMsgFromYaw(0);
                 plan.push_back(coord);
                 continue;
             }
@@ -159,7 +163,7 @@ namespace astar_planner {
             m_costmap->mapToWorld(tmp_x,tmp_y,prev_x,prev_y);
 
             double angle = atan2(cur_y-prev_y,cur_x-prev_x);
-            coord.pose.orientation= tf::createQuaternionMsgFromYaw(angle);
+            coord.pose.orientation= tf::createQuaternionMsgFromYaw(0);
 
             plan.push_back(coord);
             
@@ -227,5 +231,27 @@ namespace astar_planner {
             return false;
         }
         return true;
+    }
+
+    void AstarPlanner::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path) {
+    if (!initialized) {
+        ROS_ERROR(
+                "This planner has not been initialized yet, but it is being used, please call initialize() before use");
+        return;
+    }
+
+    //create a message for the plan
+    nav_msgs::Path gui_path;
+    gui_path.poses.resize(path.size());
+
+    gui_path.header.frame_id = frame_id;
+    gui_path.header.stamp = ros::Time::now();
+
+    // Extract the plan in world co-ordinates, we assume the path is all in the same frame
+    for (unsigned int i = 0; i < path.size(); i++) {
+        gui_path.poses[i] = path[i];
+    }
+
+    pub.publish(gui_path);
     }
 };
