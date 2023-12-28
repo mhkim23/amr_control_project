@@ -102,7 +102,6 @@ namespace astar_planner {
                 continue;
             }
             if(cur.idx == goal_idx) {
-                parentNode[goal_idx] = cur.idx;
                 break;
             }
             closed[cur.idx] = true;
@@ -136,6 +135,7 @@ namespace astar_planner {
             path.push_back(reverse_start);
             reverse_start = parentNode[reverse_start];
         }
+        path.push_back(start_idx);
         reverse(path.begin(),path.end());
 
         ros::Time plan_time = ros::Time::now();
@@ -151,23 +151,14 @@ namespace astar_planner {
             coord.pose.position.x = cur_x;
             coord.pose.position.y = cur_y;
             coord.pose.position.z = 0.0;
-            if(i == 0) {
-                double angle = atan2(cur_y-0,cur_x-0);
-                coord.pose.orientation = tf::createQuaternionMsgFromYaw(0);
-                plan.push_back(coord);
-                continue;
-            }
 
-            m_costmap->indexToCells(path[i-1],tmp_x,tmp_y);
-            double prev_x, prev_y;
-            m_costmap->mapToWorld(tmp_x,tmp_y,prev_x,prev_y);
-
-            double angle = atan2(cur_y-prev_y,cur_x-prev_x);
-            coord.pose.orientation= tf::createQuaternionMsgFromYaw(0);
-
+            coord.pose.orientation.x = 0.0;
+            coord.pose.orientation.y = 0.0;
+            coord.pose.orientation.z = 0.0;
+            coord.pose.orientation.w = 1.0;
             plan.push_back(coord);
-            
         }
+        publishPlan(plan);
         return true;
     }
 
