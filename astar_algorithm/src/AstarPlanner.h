@@ -10,10 +10,11 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 #include <nav_msgs/Path.h>
+#include <tf/tf.h>
 #include <vector>
 #include <queue>
 #include <cmath>
-using namespace std;
+
 using std::string;
 using std::vector;
 using std::priority_queue;
@@ -36,6 +37,7 @@ namespace astar_planner {
             vector<int> OccupancyGridMap;
             vector<int> open;
             vector<bool> closed;
+            vector<int> parentNode;
             string m_frame_id;
             ros::Publisher pub;
             
