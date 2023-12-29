@@ -7,7 +7,15 @@ PLUGINLIB_EXPORT_CLASS(astar_planner::AstarPlanner, nav_core::BaseGlobalPlanner)
 // compare function for minimum heap
 struct cmp {
     bool operator()(Node &fst_node, Node &snd_node) {
-        return fst_node.f_cost > snd_node.f_cost;
+        if(fst_node.f_cost > snd_node.f_cost) {
+            return true;
+        }
+        else if(fst_node.f_cost == snd_node.f_cost) {
+            return fst_node.g_cost < snd_node.g_cost;
+        }
+        else {
+            return false;
+        }
     }
 };
 
@@ -31,11 +39,11 @@ namespace astar_planner {
             cellsY = m_costmap->getSizeInCellsY();
             cellsX = m_costmap->getSizeInCellsX();
             area = cellsY * cellsX;
-
+            resolution = m_costmap->getResolution();
             OccupancyGridMap.resize(area,0);
             for(unsigned int i = 0; i < cellsY; i++) {
                 for(unsigned int j = 0; j < cellsX; j++) {
-                    int cost = (int)m_costmap->getCost(j,i);
+                    int cost = m_costmap->getCost(j,i);
                     if(cost == 0) {
                         OccupancyGridMap[i*cellsX+j] = 1;
                     }
@@ -60,16 +68,15 @@ namespace astar_planner {
             return false;
         }
         //get the start pose of the map from the world
-        double world_x = start.pose.position.x;
-        double world_y = start.pose.position.y;
+        double world_sx = start.pose.position.x;
+        double world_sy = start.pose.position.y;
         unsigned int start_x,start_y;
-        m_costmap->worldToMap(world_x,world_y,start_x,start_y);
-
+        worldToMap(world_sx,world_sy,start_x,start_y);
         //get the goal pose of the map from the world
-        world_x = goal.pose.position.x;
-        world_y = goal.pose.position.y;
+        double world_gx = goal.pose.position.x;
+        double world_gy = goal.pose.position.y;
         unsigned int goal_x,goal_y;
-        m_costmap->worldToMap(world_x,world_y,goal_x,goal_y);
+        worldToMap(world_gx,world_gy,goal_x,goal_y);
 
         //make the open and cloosed checking vector
         open.resize(area,2000000000);
@@ -79,6 +86,17 @@ namespace astar_planner {
         int start_idx = m_costmap->getIndex(start_x,start_y);
         int goal_idx = m_costmap->getIndex(goal_x,goal_y);
         
+        //check the start and goal located at the correct poistion
+        if(OccupancyGridMap[start_idx] == 0 || !areaLimit(start_x,start_y)) {
+            ROS_WARN("%f   %f",world_sx,world_sy);
+            ROS_WARN("%f   %f",world_gx,world_gy);
+            ROS_WARN("Wrong start position");
+            return false;
+        }
+        if(OccupancyGridMap[goal_idx] == 0 || !areaLimit(goal_x,goal_y)) {
+            ROS_WARN("Wrong goal position");
+            return false;
+        }
         //pq to get the lowest value of the fuctions
         priority_queue<Node,vector<Node>,cmp> pq_wait;
 
@@ -143,7 +161,12 @@ namespace astar_planner {
             unsigned int tmp_x,tmp_y;
             m_costmap->indexToCells(path[i],tmp_x,tmp_y);
             double cur_x,cur_y;
-            m_costmap->mapToWorld(tmp_x,tmp_y,cur_x,cur_y);
+            mapToWorld(tmp_x,tmp_y,cur_x,cur_y);
+
+            m_costmap->indexToCells(path[i-1],tmp_x,tmp_y);
+            double prev_x,prev_y;
+            mapToWorld(tmp_x,tmp_y,prev_x,prev_y);
+            double angle = atan2(cur_y-prev_y,cur_x-prev_x);
 
             geometry_msgs::PoseStamped coord;
             coord.header.stamp = plan_time;
@@ -152,10 +175,7 @@ namespace astar_planner {
             coord.pose.position.y = cur_y;
             coord.pose.position.z = 0.0;
 
-            coord.pose.orientation.x = 0.0;
-            coord.pose.orientation.y = 0.0;
-            coord.pose.orientation.z = 0.0;
-            coord.pose.orientation.w = 1.0;
+            coord.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
             plan.push_back(coord);
         }
         publishPlan(plan);
@@ -223,6 +243,26 @@ namespace astar_planner {
         }
         return true;
     }
+    void AstarPlanner::mapToWorld(unsigned int mx, unsigned int my, double& wx, double& wy) {
+        wx = m_costmap->getOriginX() + (mx) * m_costmap->getResolution();
+        wy = m_costmap->getOriginY() + (my) * m_costmap->getResolution();
+    }
+
+    bool AstarPlanner::worldToMap(double wx, double wy, unsigned int& mx, unsigned int& my) {
+        double origin_x = m_costmap->getOriginX(), origin_y = m_costmap->getOriginY();
+        double resolution = m_costmap->getResolution();
+
+        if (wx < origin_x || wy < origin_y)
+            return false;
+
+        mx = (wx - origin_x) / resolution;
+        my = (wy - origin_y) / resolution;
+    
+        if (mx < m_costmap->getSizeInCellsX() && my < m_costmap->getSizeInCellsY())
+            return true;
+    
+        return false;
+    }
 
     void AstarPlanner::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path) {
     if (!initialized) {
@@ -235,7 +275,7 @@ namespace astar_planner {
     nav_msgs::Path gui_path;
     gui_path.poses.resize(path.size());
 
-    gui_path.header.frame_id = frame_id;
+    gui_path.header.frame_id = m_frame_id;
     gui_path.header.stamp = ros::Time::now();
 
     // Extract the plan in world co-ordinates, we assume the path is all in the same frame
@@ -245,4 +285,5 @@ namespace astar_planner {
 
     pub.publish(gui_path);
     }
+
 };

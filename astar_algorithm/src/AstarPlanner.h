@@ -33,6 +33,7 @@ namespace astar_planner {
             costmap_2d::Costmap2D *m_costmap;
             int cellsY;
             int cellsX;
+            double resolution;
             int area;
             vector<int> OccupancyGridMap;
             vector<int> open;
@@ -40,7 +41,6 @@ namespace astar_planner {
             vector<int> parentNode;
             string m_frame_id;
             ros::Publisher pub;
-            string frame_id;
             AstarPlanner(); // default constructor
             AstarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
@@ -54,6 +54,8 @@ namespace astar_planner {
             int getHeuristic(int nIdx, int goalIdx);
             bool areaLimit(int x, int y);
             void publishPlan(const std::vector<geometry_msgs::PoseStamped>& path);
+            void mapToWorld(unsigned int mx, unsigned int my, double& wx, double& wy);
+            bool worldToMap(double wx, double wy, unsigned int& mx, unsigned int& my);
     };
 };
 
