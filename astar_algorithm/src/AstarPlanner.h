@@ -36,9 +36,6 @@ namespace astar_planner {
             double resolution;
             int area;
             vector<int> OccupancyGridMap;
-            vector<int> open;
-            vector<bool> closed;
-            vector<int> parentNode;
             string m_frame_id;
             ros::Publisher pub;
             AstarPlanner(); // default constructor

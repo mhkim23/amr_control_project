@@ -7,15 +7,7 @@ PLUGINLIB_EXPORT_CLASS(astar_planner::AstarPlanner, nav_core::BaseGlobalPlanner)
 // compare function for minimum heap
 struct cmp {
     bool operator()(Node &fst_node, Node &snd_node) {
-        if(fst_node.f_cost > snd_node.f_cost) {
-            return true;
-        }
-        else if(fst_node.f_cost == snd_node.f_cost) {
-            return fst_node.g_cost < snd_node.g_cost;
-        }
-        else {
-            return false;
-        }
+        return fst_node.f_cost > snd_node.f_cost;
     }
 };
 
@@ -40,13 +32,18 @@ namespace astar_planner {
             cellsX = m_costmap->getSizeInCellsX();
             area = cellsY * cellsX;
             resolution = m_costmap->getResolution();
-            OccupancyGridMap.resize(area,0);
+            OccupancyGridMap.clear();
+            OccupancyGridMap.resize(area);
             for(unsigned int i = 0; i < cellsY; i++) {
                 for(unsigned int j = 0; j < cellsX; j++) {
-                    int cost = m_costmap->getCost(j,i);
+                    unsigned int cost = static_cast<int>(m_costmap->getCost(j,i));
                     if(cost == 0) {
                         OccupancyGridMap[i*cellsX+j] = 1;
                     }
+                    else {
+                        OccupancyGridMap[i*cellsX+j] = 0;
+                    }
+                    
                 }
             }
 
@@ -67,20 +64,18 @@ namespace astar_planner {
             ROS_WARN("Not Initialized");
             return false;
         }
+
         //get the start pose of the map from the world
         double world_sx = start.pose.position.x;
         double world_sy = start.pose.position.y;
         unsigned int start_x,start_y;
-        worldToMap(world_sx,world_sy,start_x,start_y);
+        m_costmap->worldToMap(world_sx,world_sy,start_x,start_y);
+
         //get the goal pose of the map from the world
         double world_gx = goal.pose.position.x;
         double world_gy = goal.pose.position.y;
         unsigned int goal_x,goal_y;
-        worldToMap(world_gx,world_gy,goal_x,goal_y);
-
-        //make the open and cloosed checking vector
-        open.resize(area,2000000000);
-        closed.resize(area,false);
+        m_costmap->worldToMap(world_gx,world_gy,goal_x,goal_y);
 
         //convert to the index from the coordinates
         int start_idx = m_costmap->getIndex(start_x,start_y);
@@ -88,8 +83,7 @@ namespace astar_planner {
         
         //check the start and goal located at the correct poistion
         if(OccupancyGridMap[start_idx] == 0 || !areaLimit(start_x,start_y)) {
-            ROS_WARN("%f   %f",world_sx,world_sy);
-            ROS_WARN("%f   %f",world_gx,world_gy);
+            ROS_WARN("%d  %d       %d",start_x,start_y,OccupancyGridMap[start_idx]);
             ROS_WARN("Wrong start position");
             return false;
         }
@@ -98,10 +92,12 @@ namespace astar_planner {
             return false;
         }
         //pq to get the lowest value of the fuctions
-        priority_queue<Node,vector<Node>,cmp> pq_wait;
-
+        //make the open and cloosed checking vector
         //make the parent node
-        parentNode.resize(area,-10);
+        priority_queue<Node,vector<Node>,cmp> pq_wait;
+        vector<int> open(area,1000000);
+        vector<bool> closed(area,false);
+        vector<int> parentNode(area,-10);
 
         //make the start node
         Node start_node;
@@ -161,11 +157,11 @@ namespace astar_planner {
             unsigned int tmp_x,tmp_y;
             m_costmap->indexToCells(path[i],tmp_x,tmp_y);
             double cur_x,cur_y;
-            mapToWorld(tmp_x,tmp_y,cur_x,cur_y);
+            m_costmap->mapToWorld(tmp_x,tmp_y,cur_x,cur_y);
 
             m_costmap->indexToCells(path[i-1],tmp_x,tmp_y);
             double prev_x,prev_y;
-            mapToWorld(tmp_x,tmp_y,prev_x,prev_y);
+            m_costmap->mapToWorld(tmp_x,tmp_y,prev_x,prev_y);
             double angle = atan2(cur_y-prev_y,cur_x-prev_x);
 
             geometry_msgs::PoseStamped coord;
@@ -178,7 +174,6 @@ namespace astar_planner {
             coord.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
             plan.push_back(coord);
         }
-        publishPlan(plan);
         return true;
     }
 
@@ -212,7 +207,7 @@ namespace astar_planner {
         m_costmap->indexToCells(sndIdx,tmp_x,tmp_y);
         int snd_x = tmp_x;
         int snd_y = tmp_y;
-        int cost = abs(fst_x-snd_y) + abs(fst_y-snd_y);
+        int cost = abs(fst_x-snd_x) + abs(fst_y-snd_y);
         if(cost == 2) {
             // pythagorean theorem
             return 1.414;
@@ -243,47 +238,4 @@ namespace astar_planner {
         }
         return true;
     }
-    void AstarPlanner::mapToWorld(unsigned int mx, unsigned int my, double& wx, double& wy) {
-        wx = m_costmap->getOriginX() + (mx) * m_costmap->getResolution();
-        wy = m_costmap->getOriginY() + (my) * m_costmap->getResolution();
-    }
-
-    bool AstarPlanner::worldToMap(double wx, double wy, unsigned int& mx, unsigned int& my) {
-        double origin_x = m_costmap->getOriginX(), origin_y = m_costmap->getOriginY();
-        double resolution = m_costmap->getResolution();
-
-        if (wx < origin_x || wy < origin_y)
-            return false;
-
-        mx = (wx - origin_x) / resolution;
-        my = (wy - origin_y) / resolution;
-    
-        if (mx < m_costmap->getSizeInCellsX() && my < m_costmap->getSizeInCellsY())
-            return true;
-    
-        return false;
-    }
-
-    void AstarPlanner::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path) {
-    if (!initialized) {
-        ROS_ERROR(
-                "This planner has not been initialized yet, but it is being used, please call initialize() before use");
-        return;
-    }
-
-    //create a message for the plan
-    nav_msgs::Path gui_path;
-    gui_path.poses.resize(path.size());
-
-    gui_path.header.frame_id = m_frame_id;
-    gui_path.header.stamp = ros::Time::now();
-
-    // Extract the plan in world co-ordinates, we assume the path is all in the same frame
-    for (unsigned int i = 0; i < path.size(); i++) {
-        gui_path.poses[i] = path[i];
-    }
-
-    pub.publish(gui_path);
-    }
-
 };
