@@ -4,13 +4,13 @@
 //register this planner as a BaseAstarPlanner plugin
 PLUGINLIB_EXPORT_CLASS(astar_planner::AstarPlanner, nav_core::BaseGlobalPlanner)
 
-// compare function for minimum heap
+// minimum heap for cell cost first and function value second
 struct cmp {
     bool operator()(Node &fst_node, Node &snd_node) {
-        if(fst_node.cell_size > snd_node.cell_size) {
+        if(fst_node.cell_cost > snd_node.cell_cost) {
             return true;
         }
-        else if(fst_node.cell_size == snd_node.cell_size) {
+        else if(fst_node.cell_cost == snd_node.cell_cost) {
             return fst_node.f_cost > snd_node.f_cost;
         }
         else {
@@ -24,14 +24,15 @@ int dx[8] = {0,1,1,1,0,-1,-1,-1};
 int dy[8] = {-1,-1,0,1,1,1,0,-1};
 namespace astar_planner {
 
-    //Constructor
+    //default Constructor
     AstarPlanner::AstarPlanner(){}
 
+    //Constructor
     AstarPlanner::AstarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros){
         initialize(name, costmap_ros);
     }
 
-    //initialized the atar planner
+    //initialize the atar planner
     void AstarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros){
         if(!initialized) {
             m_costmap_ros = costmap_ros;
@@ -59,7 +60,6 @@ namespace astar_planner {
         }
         else {
             ROS_WARN("Already Initialized");
-
         }
     }
 
@@ -86,15 +86,14 @@ namespace astar_planner {
         int start_idx = m_costmap->getIndex(start_x,start_y);
         int goal_idx = m_costmap->getIndex(goal_x,goal_y);
         
-        //check the start and goal located at the correct poistion
-        //what if it gets to the free space area
+        //check the start and goal pose located at the correct poistion
         if(OccupancyGridMap[start_idx] > 0 || !areaLimit(start_x,start_y)) {
-            ROS_INFO("%d  %d       %d",start_x,start_y,OccupancyGridMap[start_idx]);
             ROS_INFO("Wrong start position");
         }
         if(OccupancyGridMap[goal_idx] > 0 || !areaLimit(goal_x,goal_y)) {
             ROS_INFO("Wrong goal position");
         }
+
         //pq to get the lowest value of the fuctions
         //make the open and closed checking vector
         //make the parent node
@@ -108,7 +107,7 @@ namespace astar_planner {
         start_node.f_cost = 0 + getHeuristic(start_idx,goal_idx);
         start_node.g_cost = 0;
         start_node.idx = start_idx;
-        start_node.cell_size = OccupancyGridMap[start_idx];
+        start_node.cell_cost = OccupancyGridMap[start_idx];
         open[start_idx] = start_node.f_cost;
         parentNode[start_idx] = -1;
         pq_wait.push(start_node);
@@ -133,7 +132,7 @@ namespace astar_planner {
                 }
                 nxt.g_cost = cur.g_cost + getGcost(cur.idx,nxt.idx);
                 nxt.f_cost = nxt.g_cost + getHeuristic(nxt.idx,goal_idx);
-                nxt.cell_size = OccupancyGridMap[nxt.idx];
+                nxt.cell_cost = OccupancyGridMap[nxt.idx];
                 if(open[nxt.idx] < nxt.f_cost) {
                     continue;
                 }
@@ -181,8 +180,8 @@ namespace astar_planner {
             plan.push_back(coord);
         }
         plan.push_back(goal);
-        ROS_INFO("Start Pose: %f  %f", start.pose.position.x,start.pose.position.y);
-        ROS_INFO("Goal Pose:%f  %f", goal.pose.position.x,goal.pose.position.y);
+        ROS_INFO("Start Pose: %f  %f  %f", start.pose.position.x,start.pose.position.y,start.pose.orientation.w);
+        ROS_INFO("Goal Pose:%f  %f  %f", goal.pose.position.x,goal.pose.position.y,goal.pose.orientation.w);
         return true;
     }
 
