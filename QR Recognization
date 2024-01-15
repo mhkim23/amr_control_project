@@ -87,7 +87,6 @@ def capture_qr_code():
 
     while True:
         try:
-            sleep(2)
 
             # Capture the first frame
             _, frame1 = cap.read()
