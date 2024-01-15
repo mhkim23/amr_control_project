@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from time import sleep
 from PIL import Image
 from pyzbar.pyzbar import decode
 
