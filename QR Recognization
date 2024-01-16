@@ -72,12 +72,15 @@ def draw_center_line(frame, qr_center):
     # Calculate the angle (theta) of the line
     theta = np.arctan2(direction_vector[1], direction_vector[0])
 
-    # Print the vector form (x, y, theta)
-    print(f"Vector Form: ({direction_vector[0]}, {direction_vector[1]}, {theta})")
+    # Calculate x, y in meter
+    x_coordinate = direction_vector[0] * 0.0002375
+    y_coordinate = direction_vector[1] * 0.0002375
+
+    # Print the vector form (x, y, theta) in meter and radian
+    print(f"Vector Form: ({x_coordinate}, {y_coordinate}, {theta})")
 
     # Draw a line from the center of the frame to the center of the QR code
     cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
-
     while True:
         try:
 
