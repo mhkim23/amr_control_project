@@ -64,25 +64,19 @@ def stabilize_image(frame1, frame2):
 
 def draw_center_line(frame, qr_center):
     # Get the center of the frame
-    frame_center = (int(frame.shape[1] / 2), int(frame.shape[0] / 2))
+    frame_center = np.array([frame.shape[1] / 2, frame.shape[0] / 2])
+
+    # Get the direction vector from the center of the frame to the center of the QR code
+    direction_vector = qr_center - frame_center
+
+    # Calculate the angle (theta) of the line
+    theta = np.arctan2(direction_vector[1], direction_vector[0])
+
+    # Print the vector form (x, y, theta)
+    print(f"Vector Form: ({direction_vector[0]}, {direction_vector[1]}, {theta})")
 
     # Draw a line from the center of the frame to the center of the QR code
-    cv2.line(frame, frame_center, tuple(map(int, qr_center)), (255, 0, 0), 2)
-
-def capture_qr_code():
-    # Set the desired resolution and fps 1280 x 960은 지원하지 않아서 그런가 오류남
-    desired_width = 640
-    desired_height = 480 
-    desired_fps = 1 
-
-    cap = cv2.VideoCapture(0)
-
-    # Set the resolution
-    cap.set(3, desired_width)  # Set the width
-    cap.set(4, desired_height)  # Set the height
-
-    # Set the frames per second
-    cap.set(cv2.CAP_PROP_FPS, desired_fps)
+    cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
 
     while True:
         try:
