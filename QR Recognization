@@ -62,62 +62,6 @@ def stabilize_image(frame1, frame2):
         print(f"Error: {e}")
         raise
 
-def capture_qr_code():
-    # Set the desired resolution and fps 1280 x 960 doesn't work since the camera doesn't support
-    desired_width = 640
-    desired_height = 480 
-    desired_fps = 15 
-
-    cap = cv2.VideoCapture(0)
-
-    # Set the resolution
-    cap.set(3, desired_width)  # Set the width
-    cap.set(4, desired_height)  # Set the height
-
-    # Set the frames per second
-    cap.set(cv2.CAP_PROP_FPS, desired_fps)
-
-    while True:
-        try: 
-
-            # Capture the first frame
-            _, frame1 = cap.read()
-
-            while True:
-                # Capture the second frame
-                _, frame2 = cap.read()
-
-                # Stabilize the frames
-                stabilized_frame = stabilize_image(frame1, frame2)
-
-                # Save the stabilized frame as an image
-                cv2.imwrite('qr_code_image.jpg', stabilized_frame)
-
-                # Perform QR code decoding on the stabilized frame
-                decoded_objects = decode(Image.fromarray(stabilized_frame))
-
-                # Print the decoded information
-                if decoded_objects:
-                    for obj in decoded_objects:
-                        print(f'Type: {obj.type}, Data: {obj.data.decode("utf-8")}')
-
-                # Update frame1 for the next iteration
-                frame1 = frame2
-
-        except KeyboardInterrupt:
-            # Handle KeyboardInterrupt (print, log, etc.)
-            print("Program interrupted by user.")
-            break
-        except Exception as e:
-            # Handle other exceptions (print, log, etc.)
-            print(f"Error: {e}")
-            continue
-
-    # Release the camera
-    cap.release()
-    # Close all OpenCV windows
-    cv2.destroyAllWindows()
-
 def draw_center_line(frame, qr_center):
     # Get the center of the frame
     frame_center = np.array([frame.shape[1] / 2, frame.shape[0] / 2])
@@ -137,6 +81,21 @@ def draw_center_line(frame, qr_center):
 
     # Draw a line from the center of the frame to the center of the QR code
     cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
+
+def capture_qr_code():
+    # Set the desired resolution and fps 1280 x 960 doesn't supported by camera
+    desired_height = 480 
+    desired_fps = 15 
+
+    cap = cv2.VideoCapture(0)
+
+    # Set the resolution
+    cap.set(3, desired_width)  # Set the width
+    cap.set(4, desired_height)  # Set the height
+
+    # Set the frames per second
+    cap.set(cv2.CAP_PROP_FPS, desired_fps)
+
     while True:
         try:
 
