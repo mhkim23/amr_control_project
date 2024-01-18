@@ -1,7 +1,12 @@
+#!/usr/bin/env python
+
 import cv2
 import numpy as np
 from PIL import Image
 from pyzbar.pyzbar import decode
+from sensor_msgs.msg import Image as ImageMsg
+from cv_bridge import CvBridge
+import rospy
 
 def stabilize_image(frame1, frame2):
     try:
@@ -62,8 +67,8 @@ def stabilize_image(frame1, frame2):
         print(f"Error: {e}")
         raise
 
-def draw_center_line(frame, qr_center, qr_box):
 
+def draw_center_line(frame, qr_center, qr_box):
     # Get the orientation of the specific line of the bounding box
     box_orientation = np.arctan2(qr_box[2][0][1] - qr_box[1][0][1], qr_box[2][0][0] - qr_box[1][0][0])
 
@@ -101,8 +106,14 @@ def draw_center_line(frame, qr_center, qr_box):
     cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_x)), (0, 255, 0), 2)
     cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_y)), (0, 0, 255), 2)
 	
+
 def capture_qr_code():
-    # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
+    rospy.init_node('qr_code_detector', anonymous=True)
+    image_pub = rospy.Publisher('stabilized_image', ImageMsg, queue_size=10)
+
+    bridge = CvBridge()
+
+   # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
     desired_width = 640
     desired_height = 480 
     desired_fps = 15 
@@ -116,13 +127,12 @@ def capture_qr_code():
     # Set the frames per second
     cap.set(cv2.CAP_PROP_FPS, desired_fps)
 
-    while True:
+    while not rospy.is_shutdown():
         try:
-            
             # Capture the first frame
             _, frame1 = cap.read()
 
-            while True:
+            while not rospy.is_shutdown():
                 # Capture the second frame
                 _, frame2 = cap.read()
 
@@ -136,7 +146,7 @@ def capture_qr_code():
                 if decoded_objects:
                     for obj in decoded_objects:
                         qr_data = obj.data.decode("utf-8")
-                        print(f'Type: {obj.type}, Data: {qr_data}')
+                        rospy.loginfo(f'Type: {obj.type}, Data: {qr_data}')
 
                         # Get the bounding box points of the QR code
                         points = obj.polygon
@@ -149,8 +159,9 @@ def capture_qr_code():
                             qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
                             draw_center_line(stabilized_frame, qr_center, pts)
 
-                            # Save the stabilized frame with the rectangle and line as an image
-                            cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
+                            # Convert stabilized_frame to ROS ImageMsg and publish
+                            ros_image = bridge.cv2_to_imgmsg(stabilized_frame, encoding="bgr8")
+                            image_pub.publish(ros_image)
 
                 # Break the loop if 'q' is pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -159,6 +170,9 @@ def capture_qr_code():
                 # Update frame1 for the next iteration
                 frame1 = frame2
 
+        except rospy.ROSInterruptException:
+            print("ROS interrupt exception.")
+            break
         except KeyboardInterrupt:
             print("Program interrupted by user.")
             break
@@ -169,4 +183,7 @@ def capture_qr_code():
     cap.release()
 
 if __name__ == "__main__":
-    capture_qr_code()
+    try:
+        capture_qr_code()
+    except rospy.ROSInterruptException:
+        pass
