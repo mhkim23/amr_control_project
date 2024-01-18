@@ -77,7 +77,7 @@ class MoveTo_XY():
     def __init__(self):
         self.move = MoveTB3()
     
-    def move2xy(self, x, y):
+    def move2xy(self, x, y, theta):
         
         angle = atan2(y, x)
         dist  = sqrt(pow(x, 2) + pow(y, 2))
@@ -86,19 +86,31 @@ class MoveTo_XY():
         
         self.move.rotate(angle)
         self.move.straight(dist)
-        self.move.rotate(-angle)
-    
+        self.move.rotate(-angle + theta)
+
+# 좌표값 받아오는 함수
+#class GetCoordinate():
+# def __init__():
+#     rospy.Subscriber('/cameraCoordinate', msg, callbackfunc())   
+# def callbackfunc(msg):
+#     x = msg.x
+#     y = msg.y
+#     theta = msg.theta
+#     return x, y, theta
     
 if __name__ == '__main__':
 
     try:
         rospy.init_node('move_to_xy', anonymous = True)        
         xy = MoveTo_XY()
+        #coord = GetCoordinate()
         
         while not rospy.is_shutdown():
             dist_x = float(input("input distance x(m): "))
             dist_y = float(input("input distance y(m): "))
-            xy.move2xy(dist_x, dist_y)
+            theta = float(input("input theta(deg): "))
+            # dist_x, dist_y, theta = coord.callbackfunc()
+            xy.move2xy(dist_x, dist_y, theta)
             
         rospy.spin()
         
