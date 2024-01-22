@@ -132,6 +132,18 @@ def draw_center_line(frame, qr_center, qr_box):
     psi2 = - pi / 2 + box_orientation - np.radians(result_angle)
     movement = result_magnitude
 
+    if abs(psi1) > pi :
+        if psi1 < 0 :
+            psi1 += 2 * pi
+        else:
+            psi1 -= 2 * pi
+
+    if abs(psi2) > pi :
+        if psi2 < 0 :
+            psi2 += 2 * pi
+        else:
+            psi2 -= 2 * pi
+
     # Print the values of psi1, movement and psi2 in degree and meter
     print(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
