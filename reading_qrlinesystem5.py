@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import math
 from PIL import Image
 from pyzbar.pyzbar import decode
 
@@ -64,7 +63,7 @@ def stabilize_image(frame1, frame2):
         raise
 
 def draw_center_line(frame, qr_center, qr_box):
-    pi = math.pi
+    pi = np.pi
     # Get the center of the frame
     frame_center = np.array([frame.shape[1] / 2, frame.shape[0] / 2])
 
