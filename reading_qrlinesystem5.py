@@ -94,7 +94,7 @@ def draw_center_line(frame, qr_center, qr_box):
     y_coordinate = direction_vector[1] * 0.0002375
 
     # Print the vector form (x, y, theta) in meter and radian
-    print(f"Vector Form: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
+    print(f"Direction Vector: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
 
     # Draw a line from the center of the frame to the center of the QR code
     cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
@@ -104,6 +104,7 @@ def draw_center_line(frame, qr_center, qr_box):
     y_prime = np.array([-np.sin(box_orientation), np.cos(box_orientation)])
 
     # Normalize y_prime to make its magnitude equal to 1
+    x_prime *= 50
     y_prime = y_prime / np.linalg.norm(y_prime)
 
     # Scale the normalized y_prime vector to the desired magnitude (15cm in this case)
@@ -122,11 +123,18 @@ def draw_center_line(frame, qr_center, qr_box):
 
     # Calculate the magnitude and angle of the resulting vector
     result_magnitude = np.linalg.norm(result_vector) * 0.0002375
-    result_angle = np.arctan2(result_vector[1], result_vector[0]) * 180 / np.pi
+    result_angle = np.arctan2(result_vector[1], result_vector[0]) * 180 / pi
 
     # Print the magnitude and angle of the resulting vector
-    print(f"Resulting Vector Magnitude: {result_magnitude}")
-    print(f"Resulting Vector Angle: {result_angle} degrees")
+    print(f"Resulting Vector Magnitude: {result_magnitude}, Resulting Vector Angle: {result_angle} degrees")
+
+    # Calculate psi1 and psi2
+    psi1 = pi / 2 + np.radians(result_angle)
+    psi2 = - pi / 2 + box_orientation - np.radians(result_angle)
+    movement = result_magnitude
+
+    # Print the values of psi1, movement and psi2 in degree and meter
+    print(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
 def capture_qr_code():
     # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
