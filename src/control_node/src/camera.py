@@ -111,8 +111,8 @@ def draw_center_line(frame, qr_center, qr_box):
     x_prime *= 50
     y_prime = y_prime / np.linalg.norm(y_prime)
 
-    # Scale the normalized y_prime vector to the desired magnitude (15cm in this case)
-    desired_magnitude = 0.15/0.0002375
+    # Scale the normalized y_prime vector to the desired magnitude (18.5cm in this case)
+    desired_magnitude = 0.185/0.0002375
     y_prime *= desired_magnitude
 
     # Draw the new coordinate axes on the image with the origin at the center of the QR code
@@ -123,7 +123,7 @@ def draw_center_line(frame, qr_center, qr_box):
     cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_y)), (0, 0, 255), 2)
 
     # Add three vectors: y_prime, direction_vector, and (0, 631)
-    result_vector = y_prime - direction_vector + np.array([0, -631.578947])
+    result_vector = y_prime - direction_vector + np.array([0, -778.947368])
 
     # Calculate the magnitude and angle of the resulting vector
     result_magnitude = np.linalg.norm(result_vector) * 0.0002375
