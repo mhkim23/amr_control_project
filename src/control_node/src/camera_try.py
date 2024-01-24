@@ -163,6 +163,9 @@ def draw_center_line(frame, qr_center, qr_box):
     # Print the values of psi1, movement and psi2 in degree and meter
     print(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
+     # Publish the calibration values
+    publish_calibration_values(np.degrees(psi1), np.degrees(psi2), movement)
+
 def capture_qr_code():
     rospy.init_node('qr_code_detector', anonymous=True)
     image_pub = rospy.Publisher('stabilized_image', ImageMsg, queue_size=10)
