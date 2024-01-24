@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 from pyzbar.pyzbar import decode
 from sensor_msgs.msg import Image as ImageMsg
+from control_node.msg import MovingInPolar  # Import your custom message type
 from cv_bridge import CvBridge
 import rospy
 
@@ -66,6 +67,16 @@ def stabilize_image(frame1, frame2):
         # Handle the exception (print, log, etc.)
         print(f"Error: {e}")
         raise
+
+def publish_calibration_values(psi1, psi2, movement):
+    # Create a MovingInPolar message
+    moving_msg = MovingInPolar()
+    moving_msg.psi1 = psi1
+    moving_msg.psi2 = psi2
+    moving_msg.movement = movement
+
+    # Publish the MovingInPolar message
+    calibration_pub.publish(moving_msg)
 
 def draw_center_line(frame, qr_center, qr_box):
     pi = np.pi
@@ -229,6 +240,13 @@ def capture_qr_code():
 
 if __name__ == "__main__":
     try:
+        # Initialize the ROS node
+        rospy.init_node('camera_node', anonymous=True)
+
+        # Create a ROS publisher for the MovingInPolar message
+        calibration_pub = rospy.Publisher('calibration_values', MovingInPolar, queue_size=10)
+
         capture_qr_code()
+
     except rospy.ROSInterruptException:
         pass
