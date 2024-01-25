@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   CoordInfo.msg
+  MovingInPolar.msg
 )
 
 # Generate services in the 'srv' folder
