@@ -18,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   CoordInfo.msg
-  MovingInPolar.msg
 )
 
 # Generate services in the 'srv' folder
@@ -63,7 +62,6 @@ catkin_install_python(PROGRAMS
   src/button.py
   src/control.py
   src/camera.py
-  src/camera_try.py
   src/receive_coord_info_server.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
