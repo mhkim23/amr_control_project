@@ -154,7 +154,7 @@ def draw_center_line(frame, qr_center, qr_box):
     rospy.loginfo(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
     # Return the calculated values
-    return psi1, psi2, movement
+    return float(psi1), float(psi2), float(movement)
 
 def capture_qr_code():
     # Add a subscriber to the 'camera_on' topic
