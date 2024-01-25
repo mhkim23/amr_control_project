@@ -1,0 +1,15 @@
+material qr_cnc1/qr_cnc1
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture qr_cnc1.png
+                filtering none
+                scale 1.0 1.0
+            }
+        }
+    }
+}
