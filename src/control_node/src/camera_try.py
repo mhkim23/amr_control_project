@@ -1,13 +1,8 @@
-#!/usr/bin/env python
-
 import cv2
 import numpy as np
+import rospy
 from PIL import Image
 from pyzbar.pyzbar import decode
-from sensor_msgs.msg import Image as ImageMsg
-from control_node.msg import MovingInPolar  # Import your custom message type
-from cv_bridge import CvBridge
-import rospy
 
 def stabilize_image(frame1, frame2):
     try:
@@ -64,19 +59,9 @@ def stabilize_image(frame1, frame2):
         return frame2
 
     except Exception as e:
-        # Handle the exception (print, log, etc.)
-        print(f"Error: {e}")
+        # Handle the exception (rospy.loginfo, log, etc.)
+        rospy.loginfo(f"Error: {e}")
         raise
-
-def publish_calibration_values(psi1, psi2, movement):
-    # Create a MovingInPolar message
-    moving_msg = MovingInPolar()
-    moving_msg.psi1 = psi1
-    moving_msg.psi2 = psi2
-    moving_msg.movement = movement
-
-    # Publish the MovingInPolar message
-    calibration_pub.publish(moving_msg)
 
 def draw_center_line(frame, qr_center, qr_box):
     pi = np.pi
@@ -108,8 +93,8 @@ def draw_center_line(frame, qr_center, qr_box):
     x_coordinate = direction_vector[0] * -0.0002375
     y_coordinate = direction_vector[1] * 0.0002375
 
-    # Print the vector form (x, y, theta) in meter and radian
-    print(f"Direction Vector: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
+    # rospy.loginfo the vector form (x, y, theta) in meter and radian
+    rospy.loginfo(f"Direction Vector: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
 
     # Draw a line from the center of the frame to the center of the QR code
     cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
@@ -122,8 +107,8 @@ def draw_center_line(frame, qr_center, qr_box):
     x_prime *= 50
     y_prime = y_prime / np.linalg.norm(y_prime)
 
-    # Scale the normalized y_prime vector to the desired magnitude (18.5cm in this case)
-    desired_magnitude = 0.185/0.0002375
+    # Scale the normalized y_prime vector to the desired magnitude (15cm in this case)
+    desired_magnitude = 0.15/0.0002375
     y_prime *= desired_magnitude
 
     # Draw the new coordinate axes on the image with the origin at the center of the QR code
@@ -134,14 +119,14 @@ def draw_center_line(frame, qr_center, qr_box):
     cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_y)), (0, 0, 255), 2)
 
     # Add three vectors: y_prime, direction_vector, and (0, 631)
-    result_vector = y_prime - direction_vector + np.array([0, -778.947368])
+    result_vector = y_prime - direction_vector + np.array([0, -631.578947])
 
     # Calculate the magnitude and angle of the resulting vector
     result_magnitude = np.linalg.norm(result_vector) * 0.0002375
     result_angle = np.arctan2(result_vector[1], result_vector[0]) * 180 / pi
 
-    # Print the magnitude and angle of the resulting vector
-    print(f"Resulting Vector Magnitude: {result_magnitude}, Resulting Vector Angle: {result_angle} degrees")
+    # rospy.loginfo the magnitude and angle of the resulting vector
+    rospy.loginfo(f"Resulting Vector Magnitude: {result_magnitude}, Resulting Vector Angle: {result_angle} degrees")
 
     # Calculate psi1 and psi2
     psi1 = pi / 2 + np.radians(result_angle)
@@ -160,19 +145,11 @@ def draw_center_line(frame, qr_center, qr_box):
         else:
             psi2 -= 2 * pi
 
-    # Print the values of psi1, movement and psi2 in degree and meter
-    print(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
-
-     # Publish the calibration values
-    publish_calibration_values(np.degrees(psi1), np.degrees(psi2), movement)
+    # rospy.loginfo the values of psi1, movement and psi2 in degree and meter
+    rospy.loginfo(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
 def capture_qr_code():
-    rospy.init_node('qr_code_detector', anonymous=True)
-    image_pub = rospy.Publisher('stabilized_image', ImageMsg, queue_size=10)
-
-    bridge = CvBridge()
-
-   # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
+    # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
     desired_width = 640
     desired_height = 480 
     desired_fps = 15 
@@ -185,13 +162,15 @@ def capture_qr_code():
 
     # Set the frames per second
     cap.set(cv2.CAP_PROP_FPS, desired_fps)
+    reference_direction = None
 
-    while not rospy.is_shutdown():
+    while True:
         try:
+
             # Capture the first frame
             _, frame1 = cap.read()
 
-            while not rospy.is_shutdown():
+            while True:
                 # Capture the second frame
                 _, frame2 = cap.read()
 
@@ -218,9 +197,8 @@ def capture_qr_code():
                             qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
                             draw_center_line(stabilized_frame, qr_center, pts)
 
-                            # Convert stabilized_frame to ROS ImageMsg and publish
-                            ros_image = bridge.cv2_to_imgmsg(stabilized_frame, encoding="bgr8")
-                            image_pub.publish(ros_image)
+                            # Save the stabilized frame with the rectangle and line as an image
+                            cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
 
                 # Break the loop if 'q' is pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -229,27 +207,15 @@ def capture_qr_code():
                 # Update frame1 for the next iteration
                 frame1 = frame2
 
-        except rospy.ROSInterruptException:
-            print("ROS interrupt exception.")
-            break
         except KeyboardInterrupt:
-            print("Program interrupted by user.")
+            rospy.loginfo("Program interrupted by user.")
             break
         except Exception as e:
-            print(f"Error: {e}")
+            rospy.loginfo(f"Error: {e}")
             continue
 
     cap.release()
 
 if __name__ == "__main__":
-    try:
-        # Initialize the ROS node
-        rospy.init_node('camera_node', anonymous=True)
-
-        # Create a ROS publisher for the MovingInPolar message
-        calibration_pub = rospy.Publisher('calibration_values', MovingInPolar, queue_size=10)
-
-        capture_qr_code()
-
-    except rospy.ROSInterruptException:
-        pass
+    rospy.init_node('camera_node')
+    capture_qr_code()
