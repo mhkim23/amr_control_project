@@ -219,3 +219,4 @@ def capture_qr_code():
 if __name__ == "__main__":
     rospy.init_node('camera_node')
     capture_qr_code()
+    rospy.spin()
