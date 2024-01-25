@@ -211,7 +211,7 @@ def camera_on_callback(empty_msg):
                             cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
 
                             # Check the error range and publish the result
-                            check_and_publish_error_range(stabilized_frame, qr_center, pts)
+                            pub_error_range(stabilized_frame, qr_center, pts)
 
 
                 # Break the loop if 'q' is pressed
@@ -227,7 +227,7 @@ def camera_on_callback(empty_msg):
         except Exception as e:
             rospy.loginfo(f"Error: {e}")
 
-def check_and_publish_error_range(stabilized_frame, qr_center, qr_box):
+def pub_error_range(stabilized_frame, qr_center, qr_box):
     # Call the modified draw_center_line function to get psi1, psi2, and movement
     psi1, psi2, movement = draw_center_line(stabilized_frame, qr_center, qr_box)
 
