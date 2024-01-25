@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import rospy
 from geometry_msgs.msg import Twist
@@ -21,18 +21,19 @@ class MoveBot:
 
     def __init__(self):
         rospy.init_node('turtlebot_controller', anonymous=True)
-        self.sub = rospy.Subscriber('error_range', MovingInPolar, self.callbackfunc)
+        rospy.Subscriber('error_range', MovingInPolar, self.callbackfunc)
         self.pubb = rospy.Publisher('camera_on', Empty, queue_size=10)
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.rate = rospy.Rate(10)
         self.pose = MovingInPolar()
+        rospy.loginfo("TurtleBot3 Moving To Goal")
         
         self.lin_x = MAX_LIN_X / 2
         self.ang_z = MAX_ANG_Z / 2
         
         self.fstDir = 1
-        self.sndDir = 1;
-        self.distDir = 1;
+        self.sndDir = 1
+        self.distDir = 1
     
         self.fstAngle = self.pose.psi1
         self.dist = self.pose.movement
@@ -40,18 +41,20 @@ class MoveBot:
 
         #CW : Positive, CCW : Negative
         self.fstAngle = -self.fstAngle * pi / 180
-        self.sndAngle = -self.sndAngle * pi / 180; 
+        self.sndAngle = -self.sndAngle * pi / 180
     
         if(self.fstAngle < 0):
-            self.fstDir = -1;
+            self.fstDir = -1
         if(self.sndAngle < 0):
-            self.sndDir = -1;  
+            self.sndDir = -1  
         if(self.dist <0):
-            self.distDir = -1;
+            self.distDir = -1
     
     def callbackfunc(self, msg):
         self.pose = msg
+        rospy.loginfo("initailize callbakcfunc")
         if self.pose.status == False:
+            rospy.loginfo("status is false")
             self.move2goal()
         
     def move2goal(self):
