@@ -1098,6 +1098,108 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose>0.608861 -1.66899 0 0 -0 0</pose>
     </model>
+        <model name="qr_cnc1">
+        <static>true</static>
+        <link name="qr_cnc1_link">
+            <pose>-0.9 0.665 1e-3 0 0 -1.5707963267948966</pose>
+            <visual name="visual_qr_cnc1">
+                <cast_shadows>false</cast_shadows>
+                <geometry><box><size>0.025 0.025 1e-3</size></box></geometry>
+                <material>
+                    <script>
+                        <uri>model://qr_cnc1/materials/scripts</uri>
+                        <uri>model://qr_cnc1/materials/textures</uri>
+                        <name>qr_cnc1/qr_cnc1</name>
+                    </script>
+                </material>
+            </visual>
+        </link>
+    </model>
+    <model name="qr_cnc2">
+        <static>true</static>
+        <link name="qr_cnc2_link">
+            <pose>0 0.665 1e-3 0 0 -1.5707963267948966</pose>
+            <visual name="visual_qr_cnc2">
+                <cast_shadows>false</cast_shadows>
+                <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
+                <material>
+                    <script>
+                        <uri>model://qr_cnc2/materials/scripts</uri>
+                        <uri>model://qr_cnc2/materials/textures</uri>
+                        <name>qr_cnc2/qr_cnc2</name>
+                    </script>
+                </material>
+            </visual>
+        </link>
+    </model>
+    <model name="qr_cnc3">
+        <static>true</static>
+        <link name="qr_cnc3_link">
+            <pose>0.9 0.665 1e-3 0 0 -1.5707963267948966</pose>
+            <visual name="visual_qr_cnc3">
+                <cast_shadows>false</cast_shadows>
+                <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
+                <material>
+                    <script>
+                        <uri>model://qr_cnc3/materials/scripts</uri>
+                        <uri>model://qr_cnc3/materials/textures</uri>
+                        <name>qr_cnc3/qr_cnc3</name>
+                    </script>
+                </material>
+            </visual>
+        </link>
+    </model>
+    <model name="qr_cnc4">
+        <static>true</static>
+        <link name="qr_cnc4_link">
+            <pose>-0.9 -0.19 1e-3 0 0 -1.5707963267948966</pose>
+            <visual name="visual_qr_cnc4">
+                <cast_shadows>false</cast_shadows>
+                <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
+                <material>
+                    <script>
+                        <uri>model://qr_cnc4/materials/scripts</uri>
+                        <uri>model://qr_cnc4/materials/textures</uri>
+                        <name>qr_cnc4/qr_cnc4</name>
+                    </script>
+                </material>
+            </visual>
+        </link>
+    </model>
+    <model name="qr_cnc5">
+        <static>true</static>
+        <link name="qr_cnc5_link">
+            <pose>0 -0.19 1e-3 0 0 -1.5707963267948966</pose>
+            <visual name="visual_qr_cnc5">
+                <cast_shadows>false</cast_shadows>
+                <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
+                <material>
+                    <script>
+                        <uri>model://qr_cnc5/materials/scripts</uri>
+                        <uri>model://qr_cnc5/materials/textures</uri>
+                        <name>qr_cnc5/qr_cnc5</name>
+                    </script>
+                </material>
+            </visual>
+        </link>
+    </model>
+    <model name="qr_cnc6">
+        <static>true</static>
+        <link name="qr_cnc6_link">
+            <pose>0.9 -0.19 1e-3 0 0 -1.5707963267948966</pose>
+            <visual name="visual_qr_cnc6">
+                <cast_shadows>false</cast_shadows>
+                <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
+                <material>
+                    <script>
+                        <uri>model://qr_cnc6/materials/scripts</uri>
+                        <uri>model://qr_cnc6/materials/textures</uri>
+                        <name>qr_cnc6/qr_cnc6</name>
+                    </script>
+                </material>
+            </visual>
+        </link>
+    </model>
     <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose>-0.279022 0.78762 8.56576 -1e-06 1.4948 1.596</pose>
