@@ -67,8 +67,11 @@ def stabilize_image(frame1, frame2):
         print(f"Error: {e}")
         raise
 
+
 def draw_center_line(frame, qr_center, qr_box):
-    pi = np.pi
+    # Get the orientation of the specific line of the bounding box
+    box_orientation = np.arctan2(qr_box[2][0][1] - qr_box[1][0][1], qr_box[2][0][0] - qr_box[1][0][0])
+
     # Get the center of the frame
     frame_center = np.array([frame.shape[1] / 2, frame.shape[0] / 2])
 
@@ -76,29 +79,14 @@ def draw_center_line(frame, qr_center, qr_box):
     direction_vector = frame_center - qr_center
 
     # Calculate the angle (theta) of the line
-    theta = np.arctan2(direction_vector[1], -direction_vector[0]) * 180 / pi
-
-    # Get the orientation of the specific line of the bounding box
-    box_orientation = np.arctan2(qr_box[2][0][1] - qr_box[1][0][1], qr_box[2][0][0] - qr_box[1][0][0])
-
-    if box_orientation >= -pi/4 :
-       box_orientation = box_orientation
-       box_orientation_deg = box_orientation *180/pi
-
-    elif -3/4*pi <= box_orientation < -pi/4 :
-       box_orientation = box_orientation + pi/2
-       box_orientation_deg = box_orientation *180/pi
-
-    else:
-       box_orientation = box_orientation + pi
-       box_orientation_deg = box_orientation *180/pi
+    theta = np.arctan2(direction_vector[1], -direction_vector[0])
 
     # Calculate x, y in meter
     x_coordinate = direction_vector[0] * -0.0002375
     y_coordinate = direction_vector[1] * 0.0002375
 
     # Print the vector form (x, y, theta) in meter and radian
-    print(f"Direction Vector: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
+    print(f"Vector Form: ({x_coordinate}, {y_coordinate}, {theta})")
 
     # Draw a line from the center of the frame to the center of the QR code
     cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
@@ -107,13 +95,9 @@ def draw_center_line(frame, qr_center, qr_box):
     x_prime = np.array([np.cos(box_orientation), np.sin(box_orientation)])
     y_prime = np.array([-np.sin(box_orientation), np.cos(box_orientation)])
 
-    # Normalize y_prime to make its magnitude equal to 1
-    x_prime *= 50
-    y_prime = y_prime / np.linalg.norm(y_prime)
-
-    # Scale the normalized y_prime vector to the desired magnitude (18.5cm in this case)
-    desired_magnitude = 0.185/0.0002375
-    y_prime *= desired_magnitude
+    # Scale the vectors for visualization
+    x_prime *= 50  # You can adjust the scale as needed
+    y_prime *= 50
 
     # Draw the new coordinate axes on the image with the origin at the center of the QR code
     endpoint_x = qr_center + x_prime
@@ -121,36 +105,7 @@ def draw_center_line(frame, qr_center, qr_box):
 
     cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_x)), (0, 255, 0), 2)
     cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_y)), (0, 0, 255), 2)
-
-    # Add three vectors: y_prime, direction_vector, and (0, 631)
-    result_vector = y_prime - direction_vector + np.array([0, -778.947368])
-
-    # Calculate the magnitude and angle of the resulting vector
-    result_magnitude = np.linalg.norm(result_vector) * 0.0002375
-    result_angle = np.arctan2(result_vector[1], result_vector[0]) * 180 / pi
-
-    # Print the magnitude and angle of the resulting vector
-    print(f"Resulting Vector Magnitude: {result_magnitude}, Resulting Vector Angle: {result_angle} degrees")
-
-    # Calculate psi1 and psi2
-    psi1 = pi / 2 + np.radians(result_angle)
-    psi2 = - pi / 2 + box_orientation - np.radians(result_angle)
-    movement = result_magnitude
-
-    if abs(psi1) > pi :
-        if psi1 < 0 :
-            psi1 += 2 * pi
-        else:
-            psi1 -= 2 * pi
-
-    if abs(psi2) > pi :
-        if psi2 < 0 :
-            psi2 += 2 * pi
-        else:
-            psi2 -= 2 * pi
-
-    # Print the values of psi1, movement and psi2 in degree and meter
-    print(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
+	
 
 def capture_qr_code():
     rospy.init_node('qr_code_detector', anonymous=True)
