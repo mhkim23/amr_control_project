@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import rospy
+from std_msgs.msg import Empty
+from control_node.msg import MovingInPolar
 from PIL import Image
 from pyzbar.pyzbar import decode
 
@@ -65,6 +67,7 @@ def stabilize_image(frame1, frame2):
 
 def draw_center_line(frame, qr_center, qr_box):
     pi = np.pi
+
     # Get the center of the frame
     frame_center = np.array([frame.shape[1] / 2, frame.shape[0] / 2])
 
@@ -148,7 +151,15 @@ def draw_center_line(frame, qr_center, qr_box):
     # rospy.loginfo the values of psi1, movement and psi2 in degree and meter
     rospy.loginfo(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
+    # Return the calculated values
+    return psi1, psi2, movement
+
 def capture_qr_code():
+    # Add a subscriber to the 'camera_on' topic
+    rospy.Subscriber('camera_on', Empty, camera_on_callback)
+
+def camera_on_callback(empty_msg):
+    
     # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
     desired_width = 640
     desired_height = 480 
@@ -162,7 +173,6 @@ def capture_qr_code():
 
     # Set the frames per second
     cap.set(cv2.CAP_PROP_FPS, desired_fps)
-    reference_direction = None
 
     while True:
         try:
@@ -200,6 +210,10 @@ def capture_qr_code():
                             # Save the stabilized frame with the rectangle and line as an image
                             cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
 
+                            # Check the error range and publish the result
+                            check_and_publish_error_range(stabilized_frame, qr_center, pts)
+
+
                 # Break the loop if 'q' is pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
@@ -212,13 +226,31 @@ def capture_qr_code():
             break
         except Exception as e:
             rospy.loginfo(f"Error: {e}")
-            continue
 
-    cap.release()
+def check_and_publish_error_range(stabilized_frame, qr_center, qr_box):
+    # Call the modified draw_center_line function to get psi1, psi2, and movement
+    psi1, psi2, movement = draw_center_line(stabilized_frame, qr_center, qr_box)
+
+    # Check if the values are within the specified error range
+    error_range = 0.01
+    if abs(psi1) <= error_range and abs(psi2) <= error_range and abs(movement) <= error_range:
+        status = True
+    else:
+        status = False
+
+    # Create and publish the MovingInPolar message
+    moving_msg = MovingInPolar()
+    moving_msg.status = status
+    moving_msg.psi1 = psi1
+    moving_msg.psi2 = psi2
+    moving_msg.movement = movement
+    pub.publish(moving_msg)
 
 if __name__ == "__main__":
     try:
         rospy.init_node('camera_node')
+        # Add a publisher for the 'error_range' topic
+        pub = rospy.Publisher('error_range', MovingInPolar, queue_size=10)
         capture_qr_code()
         rospy.spin()
     except rospy.ROSInterruptException:
