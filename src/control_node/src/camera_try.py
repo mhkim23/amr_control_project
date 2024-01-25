@@ -217,6 +217,10 @@ def capture_qr_code():
     cap.release()
 
 if __name__ == "__main__":
-    rospy.init_node('camera_node')
-    capture_qr_code()
-    rospy.spin()
+    try:
+        rospy.init_node('camera_node')
+        capture_qr_code()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        rospy.loginfo("ROS interrupt exception.")
+        pass
