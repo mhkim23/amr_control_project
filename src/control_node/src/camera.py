@@ -13,6 +13,9 @@ class CameraNode:
         rospy.init_node('camera_node')
         self.pub = rospy.Publisher('error_range', MovingInPolar, queue_size=100)
         self.sub = rospy.Subscriber('camera_on', Empty, self.camera_on_callback)
+        self.psi1
+        self.psi2
+        self.movement
 
     def stabilize_image(self, frame1, frame2):
         try:
@@ -162,11 +165,8 @@ class CameraNode:
         # Return the calculated values
         return float(psi1), float(psi2), float(movement)
     
-    def pub_error_range(self, stabilized_frame, qr_center, qr_box):
+    def pub_error_range(self, psi1, psi2, movement):
         rospy.loginfo("Publishing the error range...")
-        # Call the modified draw_center_line function to get psi1, psi2, and movement
-        psi1, psi2, movement = self.draw_center_line(stabilized_frame, qr_center, qr_box)
-
         # Check if the values are within the specified error range
         error_range = 0.01
         if abs(psi1) <= error_range and abs(psi2) <= error_range and abs(movement) <= error_range:
@@ -228,13 +228,13 @@ class CameraNode:
 
                                 # Draw a line from the center of the frame to the center of the QR code
                                 qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
-                                self.draw_center_line(stabilized_frame, qr_center, pts)
+                                self.psi1, self.psi2, self.movement = self.draw_center_line(stabilized_frame, qr_center, pts)
 
-                                # Save the stabilized frame with the rectangle and line as an image
-                                cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
+                                # # Save the stabilized frame with the rectangle and line as an image
+                                # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
 
                                 # Check the error range and publish the result
-                                self.pub_error_range(stabilized_frame, qr_center, pts)
+                                self.pub_error_range(self.psi1, self.psi2, self.movement)
 
 
                     # Break the loop if 'q' is pressed
