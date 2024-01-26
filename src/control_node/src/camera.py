@@ -204,7 +204,7 @@ class CameraNode:
                 # Capture the first frame
                 _, frame1 = cap.read()
 
-                for _ in ragnge(3):
+                for _ in range(3):
                     # Capture the second frame
                     _, frame2 = cap.read()
 
