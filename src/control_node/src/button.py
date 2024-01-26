@@ -13,13 +13,13 @@ class MyGUI:
 
     def create_buttons(self):
         button_info = [
-            {"label": "CNC1", "x": 1.37, "y": -1.343, "yaw": 1.570796},
-            {"label": "CNC2", "x": 1.475, "y": -0.44, "yaw": 1.570796},
-            {"label": "CNC3", "x": 1.645, "y": 0.495, "yaw": 1.570796},
-            {"label": "CNC4", "x": 2.265, "y": -1.5, "yaw": 1.570796},
-            {"label": "CNC5", "x": 2.4, "y": -0.61, "yaw": 1.570796},
-            {"label": "CNC6", "x": 2.53, "y": 0.345, "yaw": 1.570796},
-            {"label": "Initialize", "x": 1.37, "y": -1.343, "yaw": 1.570796}
+            {"label": "CNC1", "x": 1.37, "y": -1.343, "yaw": 3.14},
+            {"label": "CNC2", "x": 1.475, "y": -0.44, "yaw": 3.14},
+            {"label": "CNC3", "x": 1.645, "y": 0.495, "yaw": 3.14},
+            {"label": "CNC4", "x": 2.265, "y": -1.5, "yaw": 3.14},
+            {"label": "CNC5", "x": 2.4, "y": -0.61, "yaw": 3.14},
+            {"label": "CNC6", "x": 2.53, "y": 0.345, "yaw": 3.14},
+            {"label": "Initialize", "x": 1.37, "y": -1.343, "yaw": 3.14}
         ]
 
         for i, info in enumerate(button_info):
