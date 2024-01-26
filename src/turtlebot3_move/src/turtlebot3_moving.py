@@ -58,7 +58,7 @@ class MoveBot:
             self.move2goal()
         
     def move2goal(self):
-        
+        rospy.loginfo("move2goal")
         timeFstAngle = self.fstAngle / self.ang_z * self.fstDir
         timeDist = self.dist / self.lin_x * self.distDir
         timeSndAngle = self.sndAngle / self.ang_z * self.sndDir
