@@ -199,13 +199,13 @@ class CameraNode:
         # Set the frames per second
         cap.set(cv2.CAP_PROP_FPS, desired_fps)
 
-        for _ in range(10):
+        for _ in range(5):
             try:
 
                 # Capture the first frame
                 _, frame1 = cap.read()
 
-                while True:
+                for _ in range(5):
                     # Capture the second frame
                     _, frame2 = cap.read()
 
