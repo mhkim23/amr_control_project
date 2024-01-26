@@ -182,7 +182,7 @@ class CameraNode:
         moving_msg.movement = movement
         self.pub.publish(moving_msg)
     
-    def camera_on_callback(self):
+    def camera_on_callback(self, msg):
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
         desired_width = 640
         desired_height = 480 
