@@ -26,7 +26,6 @@ class MoveBot:
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.rate = rospy.Rate(10)
         self.pose = MovingInPolar()
-        self.move2goal_completed = False
         rospy.loginfo("TurtleBot3 Moving To Goal")
         
         self.lin_x = MAX_LIN_X / 2
@@ -56,10 +55,7 @@ class MoveBot:
         rospy.loginfo("initailize callbackfunc")
         if self.pose.status == False:
             rospy.loginfo("status is false")
-            self.move2goal_completed = False
             self.move2goal()
-            while not self.move2goal_completed:
-                rospy.sleep(0.1)
         
     def move2goal(self):
         
@@ -97,7 +93,6 @@ class MoveBot:
         twist.angular.z = 0
         self.pub.publish(twist)
         
-        self.move2goal_completed = True
         return self.pubb.publish()
 
 if __name__ == '__main__':

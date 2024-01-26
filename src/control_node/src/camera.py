@@ -16,6 +16,7 @@ class CameraNode:
         self.psi1 = 0
         self.psi2 = 0
         self.movement = 0
+        self.last_result=None
 
     def stabilize_image(self, frame1, frame2):
         try:
@@ -198,7 +199,7 @@ class CameraNode:
         # Set the frames per second
         cap.set(cv2.CAP_PROP_FPS, desired_fps)
 
-        while True:
+        for _ in range(10):
             try:
 
                 # Capture the first frame
@@ -234,14 +235,6 @@ class CameraNode:
                                 # # Save the stabilized frame with the rectangle and line as an image
                                 # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
 
-                                # Check the error range and publish the result
-                                self.pub_error_range(self.psi1, self.psi2, self.movement)
-
-
-                    # Break the loop if 'q' is pressed
-                    if cv2.waitKey(1) & 0xFF == ord('q'):
-                        break
-
                     # Update frame1 for the next iteration
                     frame1 = frame2
 
@@ -251,6 +244,10 @@ class CameraNode:
             except Exception as e:
                 rospy.loginfo(f"Error: {e}")
                 raise
+            finally:
+                self.last_result = (self.psi1, self.psi2, self.movement)
+        if self.last_result is None:
+            self.pub_error_range(*self.last_result)
 
 if __name__ == "__main__":
     try:
