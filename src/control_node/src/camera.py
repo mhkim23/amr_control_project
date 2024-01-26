@@ -168,8 +168,9 @@ class CameraNode:
     def pub_error_range(self, psi1, psi2, movement):
         rospy.loginfo("Publishing the error range...")
         # Check if the values are within the specified error range
-        error_range = 0.01
-        if abs(psi1) <= error_range and abs(psi2) <= error_range and abs(movement) <= error_range:
+        error_distance = 0.05
+        error_angle = 0.157
+        if abs(psi1) <= error_angle and abs(psi2) <= error_angle and abs(movement) <= error_distance:
             status = True
         else:
             status = False
@@ -204,7 +205,7 @@ class CameraNode:
                 # Capture the first frame
                 _, frame1 = cap.read()
 
-                for _ in ragnge(3):
+                for _ in range(3):
                     # Capture the second frame
                     _, frame2 = cap.read()
 

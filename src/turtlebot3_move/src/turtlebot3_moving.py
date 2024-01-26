@@ -40,14 +40,14 @@ class MoveBot:
         self.sndAngle = self.pose.psi2
 
         #CW : Positive, CCW : Negative
-        self.fstAngle = -self.fstAngle * pi / 180
-        self.sndAngle = -self.sndAngle * pi / 180
+        self.fstAngle = -self.fstAngle 
+        self.sndAngle = -self.sndAngle
     
         if(self.fstAngle < 0):
             self.fstDir = -1
         if(self.sndAngle < 0):
             self.sndDir = -1  
-        if(self.dist <0):
+        if(self.dist < 0):
             self.distDir = -1
     
     def callbackfunc(self, msg):
