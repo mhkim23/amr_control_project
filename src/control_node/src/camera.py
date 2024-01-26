@@ -13,9 +13,9 @@ class CameraNode:
         rospy.init_node('camera_node')
         self.pub = rospy.Publisher('error_range', MovingInPolar, queue_size=100)
         self.sub = rospy.Subscriber('camera_on', Empty, self.camera_on_callback)
-        self.psi1
-        self.psi2
-        self.movement
+        self.psi1 = 0
+        self.psi2 = 0
+        self.movement = 0
 
     def stabilize_image(self, frame1, frame2):
         try:
