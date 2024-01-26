@@ -254,6 +254,7 @@ class CameraNode:
 if __name__ == "__main__":
     try:
         camera_node = CameraNode()
+        rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("ROS interrupt exception.")
         raise
