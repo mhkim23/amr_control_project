@@ -52,7 +52,7 @@ class MoveBot:
     
     def callbackfunc(self, msg):
         self.pose = msg
-        rospy.loginfo("initailize callbakcfunc")
+        rospy.loginfo("initailize callbackfunc")
         if self.pose.status == False:
             rospy.loginfo("status is false")
             self.move2goal()
