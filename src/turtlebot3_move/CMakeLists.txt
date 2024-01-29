@@ -164,6 +164,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   src/turtlebot3_moving.py
   src/turtlebot3_pubpose.py
+  src/turtlebot3_calibration.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
