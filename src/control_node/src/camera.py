@@ -12,7 +12,7 @@ class CameraNode:
     def __init__(self):
         rospy.init_node('camera_node')
         self.pub = rospy.Publisher('error_range', MovingInPolar, queue_size=100)
-        self.sub = rospy.Subscriber('camera_on', Empty, self.camera_on_callback)
+        self.sub = rospy.Subscriber('camera_on', Empty, self.delay)
         self.psi1 = 0
         self.psi2 = 0
         self.movement = 0
@@ -184,9 +184,13 @@ class CameraNode:
         moving_msg.movement = movement
         self.pub.publish(moving_msg)
         rospy.loginfo(f'Published: {moving_msg}')
-    
-    def camera_on_callback(self, msg):
+
+    def delay(self):
+        rospy.loginfo(f"Delaying for {2} seconds...")
         rospy.sleep(0.5)
+        self.camera_on_callback()
+            
+    def camera_on_callback(self, msg):
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
         desired_width = 640
         desired_height = 480 
