@@ -186,6 +186,7 @@ class CameraNode:
         rospy.loginfo(f'Published: {moving_msg}')
     
     def camera_on_callback(self, msg):
+        rospy.sleep(0.5)
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
         desired_width = 640
         desired_height = 480 
