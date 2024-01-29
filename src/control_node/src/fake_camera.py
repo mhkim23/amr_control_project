@@ -16,9 +16,9 @@ class CameraNode:
         self.pub = rospy.Publisher('error_range', MovingInPolar, queue_size=100)
         self.sub = rospy.Subscriber('camera_on', Empty, self.delay)
         self.img_sub = rospy.Subscriber("picamera/image_raw",Image_msg, self.img_callback)
-        self.psi1 = 0
-        self.psi2 = 0
-        self.movement = 0
+        self.psi1_list = []
+        self.psi2_list = []
+        self.movement_list = []
         self.bridge = CvBridge() # ROS 이미지 메시지와 OpenCV 이미지 객체 간 변환을 위한 객체 생성
         
     def img_callback(self, data):
@@ -174,7 +174,36 @@ class CameraNode:
 
         # Return the calculated values
         return float(psi1), float(psi2), float(movement)
-    
+
+    def init_filter_list(self):
+        self.psi1_list = []
+        self.psi2_list = []
+        self.movement_list = []
+                
+    def average_filter(self, psi1, psi2, movement):
+        rospy.loginfo("Averaging the values...")
+        # Create a list to store the values
+        psi1_list = self.psi1_list
+        psi2_list = self.psi2_list
+        movement_list = self.movement_list
+
+        # Append the values to the list
+        psi1_list.append(psi1)
+        psi2_list.append(psi2)
+        movement_list.append(movement)
+
+        # Calculate the average of the values
+        psi1_avg = sum(psi1_list) / len(psi1_list)
+        psi2_avg = sum(psi2_list) / len(psi2_list)
+        movement_avg = sum(movement_list) / len(movement_list)
+        length = len(psi1_list)
+
+        # rospy.loginfo the average values
+        # rospy.loginfo(f"psi1_avg: {psi1_avg}, psi2_avg: {psi2_avg}, movement_avg: {movement_avg}")
+
+        # Return the average values
+        return psi1_avg, psi2_avg, movement_avg, length
+      
     def pub_error_range(self, psi1, psi2, movement):
         rospy.loginfo("Publishing the error range...")
         # Check if the values are within the specified error range
@@ -201,33 +230,27 @@ class CameraNode:
             
     def camera_on_callback(self, msg):
         rospy.loginfo("Camera is on.")
+
+        psi1 = 0.0
+        psi2 = 0.0
+        movement = 0.0
+
         breaking = False
-        # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
-        desired_width = 640
-        desired_height = 480 
-        desired_fps = 15 
-
-        # cap = cv2.VideoCapture(0)
+        
         cap = cv_image
-        # # Set the resolution
-        # cap.set(3, desired_width)  # Set the width
-        # cap.set(4, desired_height)  # Set the height
-
-        # Set the frames per second
-        # cap.set(cv2.CAP_PROP_FPS, desired_fps)
 
         while True:
             try:
 
                 # Capture the first frame
-                frame1 = cv_image
+                frame1 = cap
                 
                 if breaking == True:
                     break
                 
                 while True:
                     # Capture the second frame
-                    frame2 = cv_image
+                    frame2 = cap
 
                     # Stabilize the frames
                     stabilized_frame = self.stabilize_image(frame1, frame2)
@@ -250,8 +273,12 @@ class CameraNode:
 
                                 # Draw a line from the center of the frame to the center of the QR code
                                 qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
-                                self.psi1, self.psi2, self.movement = self.draw_center_line(stabilized_frame, qr_center, pts)
-                                breaking = True
+                                psi1, psi2, movement = self.draw_center_line(stabilized_frame, qr_center, pts)
+                                psi1_avg, psi2_avg, movement_avg, length = self.average_filter(psi1, psi2, movement)
+                                
+                                if length == 10:
+                                    self.init_filter_list()
+                                    breaking = True
                                 
                                 # # Save the stabilized frame with the rectangle and line as an image
                                 # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
@@ -267,7 +294,7 @@ class CameraNode:
             except Exception as e:
                 rospy.loginfo(f"Error: {e}")
                 raise
-        self.pub_error_range(self.psi1, self.psi2, self.movement)
+        self.pub_error_range(psi1_avg, psi2_avg, movement_avg)
 
 if __name__ == "__main__":
     try:
