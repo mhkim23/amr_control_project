@@ -16,6 +16,7 @@ class CameraNode:
         self.psi1 = 0
         self.psi2 = 0
         self.movement = 0
+        self.breaking = False
 
     def stabilize_image(self, frame1, frame2):
         try:
@@ -207,8 +208,7 @@ class CameraNode:
                 
                 if breaking:
                     break
-                
-                breaking = False
+                self.breaking = False
                 
                 while True:
                     # Capture the second frame
@@ -236,7 +236,7 @@ class CameraNode:
                                 # Draw a line from the center of the frame to the center of the QR code
                                 qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
                                 self.psi1, self.psi2, self.movement = self.draw_center_line(stabilized_frame, qr_center, pts)
-                                breaking = True
+                                self.breaking = True
                                 break
                                 
                                 # # Save the stabilized frame with the rectangle and line as an image
