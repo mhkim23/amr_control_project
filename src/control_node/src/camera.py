@@ -185,10 +185,10 @@ class CameraNode:
         self.pub.publish(moving_msg)
         rospy.loginfo(f'Published: {moving_msg}')
 
-    def delay(self):
+    def delay(self, msg):
         rospy.loginfo(f"Delaying for {2} seconds...")
         rospy.sleep(0.5)
-        self.camera_on_callback()
+        self.camera_on_callback(msg)
             
     def camera_on_callback(self, msg):
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
