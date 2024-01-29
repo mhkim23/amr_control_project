@@ -199,13 +199,18 @@ class CameraNode:
         # Set the frames per second
         cap.set(cv2.CAP_PROP_FPS, desired_fps)
 
-        for _ in range(3):
+        while True:
             try:
 
                 # Capture the first frame
                 _, frame1 = cap.read()
-
-                for _ in range(3):
+                
+                if breaking:
+                    break
+                
+                breaking = False
+                
+                while True:
                     # Capture the second frame
                     _, frame2 = cap.read()
 
@@ -231,14 +236,15 @@ class CameraNode:
                                 # Draw a line from the center of the frame to the center of the QR code
                                 qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
                                 self.psi1, self.psi2, self.movement = self.draw_center_line(stabilized_frame, qr_center, pts)
-
+                                breaking = True
+                                break
+                                
                                 # # Save the stabilized frame with the rectangle and line as an image
                                 # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
 
                     # Update frame1 for the next iteration
                     frame1 = frame2
-
-
+            
             except KeyboardInterrupt:
                 rospy.loginfo("Program interrupted by user.")
                 break
@@ -249,7 +255,7 @@ class CameraNode:
 
 if __name__ == "__main__":
     try:
-        camera_node = CameraNode()
+        CameraNode()
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("ROS interrupt exception.")
