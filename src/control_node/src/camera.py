@@ -3,6 +3,8 @@
 import cv2
 import numpy as np
 import rospy
+from sensor_msgs.msg import Image as Image_msg
+from cv_bridge import CvBridge
 from std_msgs.msg import Empty
 from control_node.msg import MovingInPolar
 from PIL import Image
@@ -12,12 +14,19 @@ class CameraNode:
     def __init__(self):
         rospy.init_node('camera_node')
         self.pub = rospy.Publisher('error_range', MovingInPolar, queue_size=100)
-        self.sub = rospy.Subscriber('camera_on', Empty, self.camera_on_callback)
+        self.sub = rospy.Subscriber('camera_on', Empty, self.delay)
+        self.img_sub = rospy.Subscriber("picamera/image_raw",Image_msg, self.img_callback)
         self.psi1 = 0
         self.psi2 = 0
         self.movement = 0
+        self.bridge = CvBridge() # ROS 이미지 메시지와 OpenCV 이미지 객체 간 변환을 위한 객체 생성
+        
+    def img_callback(self, data):
+        global cv_image # 다른 def에서 사용하기 위한 전역 변수 설정
+        cv_image = self.bridge.imgmsg_to_cv2(data,"bgr8") # ROS 이미지 메시지를 OpenCV 이미지 객체로 변환
 
     def stabilize_image(self, frame1, frame2):
+        rospy.loginfo("Stabilizing the image...")
         try:
             # Convert frames to grayscale
             gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
@@ -77,6 +86,7 @@ class CameraNode:
             raise
 
     def draw_center_line(self, frame, qr_center, qr_box):
+        rospy.loginfo("Drawing the center line...")
         pi = np.pi
 
         # Get the center of the frame
@@ -108,7 +118,7 @@ class CameraNode:
         y_coordinate = direction_vector[1] * 0.0002375
 
         # rospy.loginfo the vector form (x, y, theta) in meter and radian
-        rospy.loginfo(f"Direction Vector: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
+        # rospy.loginfo(f"Direction Vector: ({x_coordinate}, {y_coordinate}, {theta}), Box Angle: {box_orientation_deg}")
 
         # Draw a line from the center of the frame to the center of the QR code
         cv2.line(frame, tuple(map(int, frame_center)), tuple(map(int, qr_center)), (255, 0, 0), 2)
@@ -122,7 +132,7 @@ class CameraNode:
         y_prime = y_prime / np.linalg.norm(y_prime)
 
         # Scale the normalized y_prime vector to the desired magnitude (15cm in this case)
-        desired_magnitude = 0.15/0.0002375
+        desired_magnitude = 0.18/0.0002375
         y_prime *= desired_magnitude
 
         # Draw the new coordinate axes on the image with the origin at the center of the QR code
@@ -133,14 +143,14 @@ class CameraNode:
         cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_y)), (0, 0, 255), 2)
 
         # Add three vectors: y_prime, direction_vector, and (0, 631)
-        result_vector = y_prime - direction_vector + np.array([0, -631.578947])
+        result_vector = y_prime - direction_vector + np.array([0, -757.894736])
 
         # Calculate the magnitude and angle of the resulting vector
         result_magnitude = np.linalg.norm(result_vector) * 0.0002375
         result_angle = np.arctan2(result_vector[1], result_vector[0]) * 180 / pi
 
         # rospy.loginfo the magnitude and angle of the resulting vector
-        rospy.loginfo(f"Resulting Vector Magnitude: {result_magnitude}, Resulting Vector Angle: {result_angle} degrees")
+        # rospy.loginfo(f"Resulting Vector Magnitude: {result_magnitude}, Resulting Vector Angle: {result_angle} degrees")
 
         # Calculate psi1 and psi2
         psi1 = pi / 2 + np.radians(result_angle)
@@ -160,7 +170,7 @@ class CameraNode:
                 psi2 -= 2 * pi
 
         # rospy.loginfo the values of psi1, movement and psi2 in degree and meter
-        rospy.loginfo(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
+        # rospy.loginfo(f"psi1: {np.degrees(psi1)} degrees, movement: {movement} psi2: {np.degrees(psi2)} degrees")
 
         # Return the calculated values
         return float(psi1), float(psi2), float(movement)
@@ -183,13 +193,20 @@ class CameraNode:
         moving_msg.movement = movement
         self.pub.publish(moving_msg)
         rospy.loginfo(f'Published: {moving_msg}')
-    
+
+    def delay(self, msg):
+        rospy.loginfo(f"Delaying for {2} seconds...")
+        rospy.sleep(2)
+        self.camera_on_callback(msg)
+               
     def camera_on_callback(self, msg):
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
         desired_width = 640
         desired_height = 480 
         desired_fps = 15 
+        
         breaking = False
+        
         cap = cv2.VideoCapture(0)
 
         # Set the resolution

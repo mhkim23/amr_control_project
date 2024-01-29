@@ -13,20 +13,13 @@ class MyGUI:
 
     def create_buttons(self):
         button_info = [
-            # {"label": "CNC1", "x": 1.37, "y": -1.343, "yaw": 2.96706},
-            # {"label": "CNC2", "x": 1.475, "y": -0.44, "yaw": 2.96706},
-            # {"label": "CNC3", "x": 1.645, "y": 0.495, "yaw": 2.96706},
-            # {"label": "CNC4", "x": 2.265, "y": -1.5, "yaw": 2.96706},
-            # {"label": "CNC5", "x": 2.4, "y": -0.61, "yaw": 2.96706},
-            # {"label": "CNC6", "x": 2.53, "y": 0.345, "yaw": 2.96706},
-            # {"label": "Initialize", "x": 1.37, "y": -1.343, "yaw": 2.96706}
-            {"label": "CNC1", "x": -0.9, "y": 0.85, "yaw": 1.57079},
-            {"label": "CNC2", "x": 0, "y": 0.85, "yaw": 1.57079},
-            {"label": "CNC3", "x": 0.9, "y": 0.85, "yaw": 1.57079},
-            {"label": "CNC4", "x": -0.9, "y": -0.05, "yaw": 1.57079},
-            {"label": "CNC5", "x": 0, "y": -0.05, "yaw": 1.57079},
-            {"label": "CNC6", "x": 0.9, "y": -0.05, "yaw": 1.57079},
-            {"label": "Initialize", "x": -0.9, "y": 0.85, "yaw": 1.57079}
+            {"label": "CNC1", "x": 1.37, "y": -1.343, "yaw": 2.96706},
+            {"label": "CNC2", "x": 1.475, "y": -0.44, "yaw": 2.96706},
+            {"label": "CNC3", "x": 1.645, "y": 0.495, "yaw": 2.96706},
+            {"label": "CNC4", "x": 2.265, "y": -1.5, "yaw": 2.96706},
+            {"label": "CNC5", "x": 2.4, "y": -0.61, "yaw": 2.96706},
+            {"label": "CNC6", "x": 2.53, "y": 0.345, "yaw": 2.96706},
+            {"label": "Initialize", "x": 1.37, "y": -1.343, "yaw": 2.96706}
         ]
 
         for i, info in enumerate(button_info):
