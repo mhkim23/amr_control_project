@@ -63,6 +63,7 @@ catkin_install_python(PROGRAMS
   src/button.py
   src/control.py
   src/camera.py
+  src/fake_camera.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
