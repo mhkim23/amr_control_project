@@ -19,7 +19,6 @@ class CameraNode:
         self.psi1 = 0
         self.psi2 = 0
         self.movement = 0
-        self.breaking = False
         self.bridge = CvBridge() # ROS 이미지 메시지와 OpenCV 이미지 객체 간 변환을 위한 객체 생성
         
     def img_callback(self, data):
@@ -133,7 +132,7 @@ class CameraNode:
         y_prime = y_prime / np.linalg.norm(y_prime)
 
         # Scale the normalized y_prime vector to the desired magnitude (15cm in this case)
-        desired_magnitude = 0.185/0.0002375
+        desired_magnitude = 0.18/0.0002375
         y_prime *= desired_magnitude
 
         # Draw the new coordinate axes on the image with the origin at the center of the QR code
@@ -144,7 +143,7 @@ class CameraNode:
         cv2.arrowedLine(frame, tuple(map(int, qr_center)), tuple(map(int, endpoint_y)), (0, 0, 255), 2)
 
         # Add three vectors: y_prime, direction_vector, and (0, 631)
-        result_vector = y_prime - direction_vector + np.array([0, -778.947368])
+        result_vector = y_prime - direction_vector + np.array([0, -757.894736])
 
         # Calculate the magnitude and angle of the resulting vector
         result_magnitude = np.linalg.norm(result_vector) * 0.0002375
@@ -202,7 +201,7 @@ class CameraNode:
             
     def camera_on_callback(self, msg):
         rospy.loginfo("Camera is on.")
-        self.breaking = False
+        breaking = False
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
         desired_width = 640
         desired_height = 480 
@@ -223,7 +222,7 @@ class CameraNode:
                 # Capture the first frame
                 frame1 = cv_image
                 
-                if self.breaking == True:
+                if breaking == True:
                     break
                 
                 while True:
@@ -252,11 +251,11 @@ class CameraNode:
                                 # Draw a line from the center of the frame to the center of the QR code
                                 qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
                                 self.psi1, self.psi2, self.movement = self.draw_center_line(stabilized_frame, qr_center, pts)
-                                self.breaking = True
+                                breaking = True
                                 
                                 # # Save the stabilized frame with the rectangle and line as an image
                                 # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
-                    if self.breaking == True:
+                    if breaking == True:
                         break
 
                     # Update frame1 for the next iteration

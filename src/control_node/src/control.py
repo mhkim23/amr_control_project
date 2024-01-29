@@ -16,7 +16,8 @@ class Button():
         # Process the received button information here
         rospy.loginfo(f"Received button information: Label={msg.label}, X={msg.x}, Y={msg.y}, Yaw={msg.yaw}")
         self.coord_info = msg
-        self.send_coord_info()
+        if msg.label != 'Initialize':
+            self.send_coord_info()
     
     def send_coord_info(self):
         # 서비스 호출 및 응답 확인
@@ -30,7 +31,7 @@ class Camera():
     def __init__(self):
         rospy.loginfo("Initialize the camera")
         self.camera_on = rospy.Publisher('camera_on', Empty, queue_size=10)
-        self.error = rospy.Subscriber('error', MovingInPolar, self.handle_error)
+        self.error = rospy.Subscriber('error_range', MovingInPolar, self.handle_error)
 
     def turn_on(self):
         rospy.loginfo("Turn on the camera")

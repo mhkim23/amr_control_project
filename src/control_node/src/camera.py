@@ -12,11 +12,10 @@ class CameraNode:
     def __init__(self):
         rospy.init_node('camera_node')
         self.pub = rospy.Publisher('error_range', MovingInPolar, queue_size=100)
-        self.sub = rospy.Subscriber('camera_on', Empty, self.delay)
+        self.sub = rospy.Subscriber('camera_on', Empty, self.camera_on_callback)
         self.psi1 = 0
         self.psi2 = 0
         self.movement = 0
-        self.breaking = False
 
     def stabilize_image(self, frame1, frame2):
         try:
@@ -184,18 +183,13 @@ class CameraNode:
         moving_msg.movement = movement
         self.pub.publish(moving_msg)
         rospy.loginfo(f'Published: {moving_msg}')
-
-    def delay(self, msg):
-        rospy.loginfo(f"Delaying for {2} seconds...")
-        rospy.sleep(2)
-        self.camera_on_callback(msg)
-            
+    
     def camera_on_callback(self, msg):
         # Set the desired resolution and fps 1280 x 960 doesn't work since it is not supported in camera v2
         desired_width = 640
         desired_height = 480 
         desired_fps = 15 
-
+        breaking = False
         cap = cv2.VideoCapture(0)
 
         # Set the resolution
@@ -210,10 +204,9 @@ class CameraNode:
 
                 # Capture the first frame
                 _, frame1 = cap.read()
-                
-                if self.breaking:
+
+                if breaking == True:
                     break
-                self.breaking = False
                 
                 while True:
                     # Capture the second frame
@@ -241,15 +234,17 @@ class CameraNode:
                                 # Draw a line from the center of the frame to the center of the QR code
                                 qr_center = np.mean(pts, axis=0).astype(int).reshape(-1)
                                 self.psi1, self.psi2, self.movement = self.draw_center_line(stabilized_frame, qr_center, pts)
-                                self.breaking = True
-                                break
+                                breaking = True
                                 
                                 # # Save the stabilized frame with the rectangle and line as an image
                                 # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
-
+                                
+                    if breaking == True:
+                        break
                     # Update frame1 for the next iteration
                     frame1 = frame2
-            
+
+
             except KeyboardInterrupt:
                 rospy.loginfo("Program interrupted by user.")
                 break
@@ -260,7 +255,7 @@ class CameraNode:
 
 if __name__ == "__main__":
     try:
-        CameraNode()
+        camera_node = CameraNode()
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("ROS interrupt exception.")
