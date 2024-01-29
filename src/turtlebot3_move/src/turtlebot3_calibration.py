@@ -48,7 +48,7 @@ class MoveBot:
         #CW : Positive, CCW : Negative
         self.fstAngle = -fstAngle 
         self.sndAngle = -sndAngle
-        self.dist = dist
+        self.dist = -dist
         # rospy.loginfo(f"fstAngle: {self.fstAngle}, dist: {self.dist}, sndAngle: {self.sndAngle}")
         if(self.fstAngle < 0):
             self.fstDir = -1
