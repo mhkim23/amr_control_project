@@ -2,9 +2,9 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-from geometry_msgs.msg import poseWithCovarianceStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from control_node.msg import CoordInfo
-from tf import tf
+from tf.transformations import quaternion_from_euler
     
 def Rotate():
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -21,21 +21,25 @@ def Rotate():
     pub.publish(twist)
 
 def Initialize() :
-    pub = rospy.Publisher('initialpose', poseWithCovarianceStamped, queue_size=100)
+    pub = rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
     rate = rospy.Rate(10)
-    start = poseWithCovarianceStamped()
+    start = PoseWithCovarianceStamped()
     start.header.frame_id = 'map'
-    start.header.stamp = rospy.time.now()
-    start.pose.pose.position.x = -1.11
-    start.pose.pose.position.y = 0.96
+    start.header.stamp = rospy.Time.now()
+    start.pose.pose.position.x = 1.37
+    start.pose.pose.position.y = -1.343
     start.pose.pose.position.z = 0.0
-    start.pose.pose.orientation = tf.createQuaternionMsgFromYaw(0.0)
+    q = quaternion_from_euler(0,0,1.57)
+    start.pose.pose.orientation.x = q[0];
+    start.pose.pose.orientation.y = q[1];
+    start.pose.pose.orientation.z = q[2];
+    start.pose.pose.orientation.w = q[3];
     start.pose.covariance[0] = 0.25
     start.pose.covariance[7] = 0.25
     start.pose.covariance[35] = 0.06853892326654787
     count = 0
     while(count < 10):
-        start.header.stamp = rospy.time.now();
+        start.header.stamp = rospy.Time.now();
         pub.publish(start)
         count+=1
         rate.sleep()
