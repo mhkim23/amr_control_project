@@ -5,7 +5,8 @@ from geometry_msgs.msg import Twist
 from math import pow, sqrt, atan, pi#, atan2
 from control_node.msg import MovingInPolar
 from std_msgs.msg import Empty
-
+from tf.transformations import euler_from_quaternion
+from nav_msgs.msg import Odometry
 
 """
    TurtleBot3(buger) MAX SPEED
@@ -33,7 +34,6 @@ class MoveBot:
         
         self.fstDir = 1
         self.sndDir = 1
-        self.distDir = 1
     
         self.fstAngle = self.pose.psi1
         self.dist = self.pose.movement
@@ -47,8 +47,6 @@ class MoveBot:
             self.fstDir = -1
         if(self.sndAngle < 0):
             self.sndDir = -1  
-        if(self.dist < 0):
-            self.distDir = -1
     
     def callbackfunc(self, msg):
         self.pose = msg
@@ -56,8 +54,15 @@ class MoveBot:
         if self.pose.status == False:
             rospy.loginfo("status is false")
             self.move2goal()
+
+    def get_rotation(self,msg):
+        global roll, pitch, yaw
+        orientation_q = msg.pose.pose.orientation
+        orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+        (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
         
     def move2goal(self):
+        sub = rospy.Subscriber ('/odom', Odometry, self.get_rotation)
         rospy.loginfo("move2goal")
         timeFstAngle = self.fstAngle / self.ang_z * self.fstDir
         timeDist = self.dist / self.lin_x * self.distDir
