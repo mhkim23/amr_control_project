@@ -206,7 +206,7 @@ class CameraNode:
                 # Capture the first frame
                 _, frame1 = cap.read()
                 
-                if breaking:
+                if self.breaking:
                     break
                 self.breaking = False
                 
