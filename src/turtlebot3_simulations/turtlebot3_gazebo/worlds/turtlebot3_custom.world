@@ -1101,7 +1101,7 @@
         <model name="qr_cnc1">
         <static>true</static>
         <link name="qr_cnc1_link">
-            <pose>-0.9 0.665 1e-3 0 0 -1.5707963267948966</pose>
+            <pose>-0.9 0.67 1e-3 0 0 -1.5707963267948966</pose>
             <visual name="visual_qr_cnc1">
                 <cast_shadows>false</cast_shadows>
                 <geometry><box><size>0.025 0.025 1e-3</size></box></geometry>
@@ -1118,7 +1118,7 @@
     <model name="qr_cnc2">
         <static>true</static>
         <link name="qr_cnc2_link">
-            <pose>0 0.665 1e-3 0 0 -1.5707963267948966</pose>
+            <pose>0 0.67 1e-3 0 0 -1.5707963267948966</pose>
             <visual name="visual_qr_cnc2">
                 <cast_shadows>false</cast_shadows>
                 <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
@@ -1135,7 +1135,7 @@
     <model name="qr_cnc3">
         <static>true</static>
         <link name="qr_cnc3_link">
-            <pose>0.9 0.665 1e-3 0 0 -1.5707963267948966</pose>
+            <pose>0.9 0.67 1e-3 0 0 -1.5707963267948966</pose>
             <visual name="visual_qr_cnc3">
                 <cast_shadows>false</cast_shadows>
                 <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
@@ -1152,7 +1152,7 @@
     <model name="qr_cnc4">
         <static>true</static>
         <link name="qr_cnc4_link">
-            <pose>-0.9 -0.19 1e-3 0 0 -1.5707963267948966</pose>
+            <pose>-0.9 -0.23 1e-3 0 0 -1.5707963267948966</pose>
             <visual name="visual_qr_cnc4">
                 <cast_shadows>false</cast_shadows>
                 <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
@@ -1169,7 +1169,7 @@
     <model name="qr_cnc5">
         <static>true</static>
         <link name="qr_cnc5_link">
-            <pose>0 -0.19 1e-3 0 0 -1.5707963267948966</pose>
+            <pose>0 -0.23 1e-3 0 0 -1.5707963267948966</pose>
             <visual name="visual_qr_cnc5">
                 <cast_shadows>false</cast_shadows>
                 <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
@@ -1186,7 +1186,7 @@
     <model name="qr_cnc6">
         <static>true</static>
         <link name="qr_cnc6_link">
-            <pose>0.9 -0.19 1e-3 0 0 -1.5707963267948966</pose>
+            <pose>0.9 -0.23 1e-3 0 0 -1.5707963267948966</pose>
             <visual name="visual_qr_cnc6">
                 <cast_shadows>false</cast_shadows>
                 <geometry><box><size>0.02 0.02 1e-3</size></box></geometry>
