@@ -52,7 +52,7 @@ class MoveBot:
         self.setParam(pose.psi1, pose.movement, pose.psi2)
         rospy.loginfo(f"msg: {msg}")
         rospy.loginfo("initailize callbackfunc")
-        if self.pose.status == False:
+        if pose.status == False:
             rospy.loginfo("status is false")
             self.move2goal()
         self.initParam()
