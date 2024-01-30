@@ -25,15 +25,10 @@ class MoveBot:
         self.pubb = rospy.Publisher('camera_on', Empty, queue_size=10)
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.rate = rospy.Rate(10)
-        self.pose = MovingInPolar()
         rospy.loginfo("TurtleBot3 Moving To Goal")
         
         self.lin_x = MAX_LIN_X / 4
         self.ang_z = MAX_ANG_Z / 4
-        
-        self.fstDir = 1
-        self.sndDir = 1
-        self.distDir = 1
         
         self.fstAngle = 0
         self.dist = 0
@@ -41,29 +36,26 @@ class MoveBot:
 
     
     def setParam(self, fstAngle, dist, sndAngle):
-        self.fstAngle = fstAngle
-        self.dist = dist
-        self.sndAngle = sndAngle
-        
         #CW : Positive, CCW : Negative
-        self.fstAngle = -fstAngle 
-        self.sndAngle = -sndAngle
+        self.fstAngle = -fstAngle
         self.dist = -dist
-        # rospy.loginfo(f"fstAngle: {self.fstAngle}, dist: {self.dist}, sndAngle: {self.sndAngle}")
-        if(self.fstAngle < 0):
-            self.fstDir = -1
-        if(self.sndAngle < 0):
-            self.sndDir = -1  
+        self.sndAngle = -sndAngle
 
+    def initParam(self):  
+        self.fstAngle = 0
+        self.dist = 0
+        self.sndAngle = 0
     
     def callbackfunc(self, msg):
-        self.pose = msg
-        self.setParam(self.pose.psi1, self.pose.movement, self.pose.psi2)
+        pose = MovingInPolar()
+        pose = msg
+        self.setParam(pose.psi1, pose.movement, pose.psi2)
         rospy.loginfo(f"msg: {msg}")
         rospy.loginfo("initailize callbackfunc")
         if self.pose.status == False:
             rospy.loginfo("status is false")
             self.move2goal()
+        self.initParam()
         
     def move2goal(self):
         rospy.loginfo("move2goal")
@@ -75,7 +67,7 @@ class MoveBot:
         twist = Twist()
 
         #rotate psi1
-        twist.angular.z = self.ang_z * self.fstDir
+        twist.angular.z = self.ang_z * self.fstAngle / abs(self.fstAngle)
         time2end = rospy.Time.now() + rospy.Duration(timeFstAngle)
         while(rospy.Time.now() < time2end):
             # rospy.loginfo(f"rotate psi1 {twist}")
@@ -85,7 +77,7 @@ class MoveBot:
         self.pub.publish(twist)
 
         #move dist
-        twist.linear.x = self.lin_x * self.distDir
+        twist.linear.x = self.lin_x * self.dist / abs(self.dist)
         time2end = rospy.Time.now() + rospy.Duration(timeDist)
         while(rospy.Time.now() < time2end): 
             self.pub.publish(twist)
@@ -96,7 +88,7 @@ class MoveBot:
         self.pub.publish(twist)
 
         #rotate psi2
-        twist.angular.z = self.ang_z * self.sndDir
+        twist.angular.z = self.ang_z * self.sndAngle / abs(self.sndAngle)
         time2end = rospy.Time.now() + rospy.Duration(timeSndAngle)
         while(rospy.Time.now() < time2end): 
             self.pub.publish(twist)
