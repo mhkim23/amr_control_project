@@ -291,8 +291,8 @@ class CameraNode:
                                     self.init_filter_list()
                                 
                                 # # Save the stabilized frame with the rectangle and line as an image
-                                file_name = 'stabilized_frame_with_rectangle_and_line.jpg'
-                                cv2.imwrite(self.get_unique_filename(file_name) , stabilized_frame)
+                                # file_name = 'stabilized_frame_with_rectangle_and_line.jpg'
+                                # cv2.imwrite(self.get_unique_filename(file_name) , stabilized_frame)
                                 
                     if breaking == True:
                         break
