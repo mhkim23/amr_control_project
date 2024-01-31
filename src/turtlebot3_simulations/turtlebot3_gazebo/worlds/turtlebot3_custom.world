@@ -470,60 +470,60 @@
       <wall_time>1703688158 65187720</wall_time>
       <iterations>10262</iterations>
       <model name='CNC'>
-        <pose>-0.9 0.45 0.15 0 -0 0</pose>
+        <pose>-0.9 0.375 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>-0.9 0.45 0.15 0 -0 0</pose>
+          <pose>-0.9 0.375 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='CNC_0'>
-        <pose>0 0.45 0.15 0 -0 0</pose>
+        <pose>0 0.375 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>0 0.45 0.15 0 -0 0</pose>
+          <pose>0 0.375 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='CNC_1'>
-        <pose>0.9 0.45 0.15 0 -0 0</pose>
+        <pose>0.9 0.375 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>0.9 0.45 0.15 0 -0 0</pose>
+          <pose>0.9 0.375 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='CNC_2'>
-        <pose>0.9 -0.45 0.15 0 -0 0</pose>
+        <pose>0.9 -0.55 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>0.9 -0.45 0.15 0 -0 0</pose>
+          <pose>0.9 -0.55 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='CNC_3'>
-        <pose>0 -0.45 0.15 0 -0 0</pose>
+        <pose>0 -0.55 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>0 -0.45 0.15 0 -0 0</pose>
+          <pose>0 -0.55 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='CNC_4'>
-        <pose>-0.9 -0.45 0.15 0 -0 0</pose>
+        <pose>-0.9 -0.55 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>-0.9 -0.45 0.15 0 -0 0</pose>
+          <pose>-0.9 -0.55 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>

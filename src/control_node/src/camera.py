@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import cv2
 import numpy as np
 import rospy
@@ -290,7 +291,8 @@ class CameraNode:
                                     self.init_filter_list()
                                 
                                 # # Save the stabilized frame with the rectangle and line as an image
-                                # cv2.imwrite('stabilized_frame_with_rectangle_and_line.jpg', stabilized_frame)
+                                file_name = 'stabilized_frame_with_rectangle_and_line.jpg'
+                                cv2.imwrite(self.get_unique_filename(file_name) , stabilized_frame)
                                 
                     if breaking == True:
                         break
@@ -305,6 +307,18 @@ class CameraNode:
                 rospy.loginfo(f"Error: {e}")
                 raise
         self.pub_error_range(psi1, psi2, movement)
+
+    def get_unique_filename(self, base_filename):
+        if not os.path.exists(base_filename):
+            return base_filename
+
+        filename, file_extension = os.path.splitext(base_filename)
+        counter = 1
+
+        while os.path.exists(f"{filename}_{counter}{file_extension}"):
+            counter += 1
+
+        return f"{filename}_{counter}{file_extension}"
 
 if __name__ == "__main__":
     try:
