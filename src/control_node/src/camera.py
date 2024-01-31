@@ -308,17 +308,6 @@ class CameraNode:
                 raise
         self.pub_error_range(psi1, psi2, movement)
 
-    def get_unique_filename(self, base_filename):
-        if not os.path.exists(base_filename):
-            return base_filename
-
-        filename, file_extension = os.path.splitext(base_filename)
-        counter = 1
-
-        while os.path.exists(f"{filename}_{counter}{file_extension}"):
-            counter += 1
-
-        return f"{filename}_{counter}{file_extension}"
 
 if __name__ == "__main__":
     try:

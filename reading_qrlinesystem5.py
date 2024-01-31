@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 from PIL import Image
@@ -201,6 +202,8 @@ def capture_qr_code():
 
                 # Break the loop if 'q' is pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):
+                    file_name = 'stabilized_frame_with_rectangle_and_line.jpg'
+                    cv2.imwrite(get_unique_filename(file_name) , stabilized_frame)
                     break
 
                 # Update frame1 for the next iteration
@@ -215,5 +218,16 @@ def capture_qr_code():
 
     cap.release()
 
+    def get_unique_filename(base_filename):
+        if not os.path.exists(base_filename):
+            return base_filename
+
+        filename, file_extension = os.path.splitext(base_filename)
+        counter = 1
+
+        while os.path.exists(f"{filename}_{counter}{file_extension}"):
+            counter += 1
+
+        return f"{filename}_{counter}{file_extension}"
 if __name__ == "__main__":
     capture_qr_code()
