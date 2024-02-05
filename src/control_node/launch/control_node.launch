@@ -1,5 +1,5 @@
 <launch>
-    <node name="button_node" pkg="control_node" type="button.py"/>
+    <node name="button_node" pkg="control_node" type="button.py" output="screen" />
     <node name="control_node" pkg="control_node" type="control.py"/>
     <node name="robot_control_node" pkg="control_node" type="robot_control_node"/>
 </launch>
